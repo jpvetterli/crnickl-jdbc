@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.jdbc
  * Type: WriteMethodsForChroniclesAndSeries
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.crnickl.jdbc;
 
@@ -40,7 +40,7 @@ import ch.agent.crnickl.jdbc.T2DBJMsg.J;
  * series.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChroniclesAndSeries {
 
@@ -114,7 +114,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			int id = getId(chronicle);
 			check(Permission.MODIFY, chronicle);
 			policy.willDelete(chronicle);
-			done = policy.delete(chronicle);
+			done = policy.deleteChronicle(chronicle);
 
 			// delete attributes first
 			delete_entity_attributes = open(DELETE_ENTITY_ATTIBUTES, chronicle, delete_entity_attributes);
@@ -314,7 +314,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			int id = getId(series);
 			check(Permission.MODIFY, series);
 			policy.willDelete(series);
-			done = policy.delete(series);
+			done = policy.deleteSeries(series);
 			delete_series = open(DELETE_SERIES, series, delete_series);
 			delete_series.setInt(1, id);
 			delete_series.execute();

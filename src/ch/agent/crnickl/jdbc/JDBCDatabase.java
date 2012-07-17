@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.jdbc
  * Type: JDBCDatabase
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.crnickl.jdbc;
 
@@ -54,7 +54,7 @@ import ch.agent.crnickl.jdbc.T2DBJMsg.J;
  * A JDBC implementation of {@link DatabaseBackendImpl}. 
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  */
 public class JDBCDatabase extends DatabaseBackendImpl {
 	
@@ -157,7 +157,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	}
 	
 	@Override
-	public void delete(UpdatableChronicle entity, AttributeDefinition<?> def) throws T2DBException {
+	public void deleteAttributeValue(UpdatableChronicle entity, AttributeDefinition<?> def) throws T2DBException {
 		getWriteMethodsForChroniclesAndSeries().deleteAttribute(entity, def);
 		publish(new UpdateEventImpl(UpdateEventOperation.MODIFY, entity).withComment("delete attribute #" + def.getNumber()));
 	}
@@ -170,7 +170,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 
 	
 	@Override
-	public void delete(UpdatableChronicle entity) throws T2DBException {
+	public void deleteChronicle(UpdatableChronicle entity) throws T2DBException {
 		getWriteMethodsForChroniclesAndSeries().deleteChronicle(entity, getChronicleUpdatePolicy());
 		// pass name and description as comment, because they are lost when logger gets them
 		String comment = getNamingPolicy().joinValueAndDescription(entity.getName(true), entity.getDescription(false));
@@ -184,7 +184,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	}
 
 	@Override
-	public <T>void delete(UpdatableSeries<T> series) throws T2DBException {
+	public <T>void deleteSeries(UpdatableSeries<T> series) throws T2DBException {
 		getWriteMethodsForChroniclesAndSeries().deleteSeries(series, getChronicleUpdatePolicy());
 		String comment = getNamingPolicy().joinValueAndDescription(series.getName(true), series.getDescription(false));
 		publish(new UpdateEventImpl(UpdateEventOperation.DELETE, series).withComment(comment));
@@ -280,7 +280,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	}
 
 	@Override
-	public void delete(UpdatableProperty<?> property) throws T2DBException {
+	public void deleteProperty(UpdatableProperty<?> property) throws T2DBException {
 		getWriteMethodsForProperty().deleteProperty(property);
 		String comment = property.getName();
 		publish(new UpdateEventImpl(UpdateEventOperation.DELETE, property).withComment(comment));
@@ -346,7 +346,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	}
 
 	@Override
-	public void delete(UpdatableValueType<?> valueType) throws T2DBException {
+	public void deleteValueType(UpdatableValueType<?> valueType) throws T2DBException {
 		getWriteMethodsForValueType().deleteValueType(valueType);
 		String comment = valueType.getName();
 		publish(new UpdateEventImpl(UpdateEventOperation.DELETE, valueType).withComment(comment));
@@ -424,17 +424,17 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	}
 
 	@Override
-	public void delete(UpdatableSchema schema, int seriesNr, int attribNr) throws T2DBException {
+	public void deleteAttributeInSchema(UpdatableSchema schema, int seriesNr, int attribNr) throws T2DBException {
 		getWriteMethodsForSchema().deleteSchemaComponent(schema, seriesNr, attribNr);
 	}
 
 	@Override
-	public void delete(UpdatableSchema schema, int seriesNr) throws T2DBException {
+	public void deleteSeriesInSchema(UpdatableSchema schema, int seriesNr) throws T2DBException {
 		getWriteMethodsForSchema().deleteSchemaComponents(schema, seriesNr);
 	}
 
 	@Override
-	public void delete(UpdatableSchema schema) throws T2DBException {
+	public void deleteSchema(UpdatableSchema schema) throws T2DBException {
 		getWriteMethodsForSchema().deleteSchema((UpdatableSchemaImpl) schema, getSchemaUpdatePolicy());
 		String comment = schema.getName();
 		publish(new UpdateEventImpl(UpdateEventOperation.DELETE, schema).withComment(comment));

@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.crnickl.jdbc
  * Type: AccessMethodsForNumber
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.crnickl.jdbc;
 
@@ -41,7 +41,7 @@ import ch.agent.t2.timeseries.TimeAddressable;
  * An implementation of {@link ValueAccessMethods} for numeric data using {@link java.lang.Double}.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class AccessMethodsForNumber extends JDBCDatabaseMethods implements ValueAccessMethods<Double> {
 	
@@ -210,7 +210,7 @@ public class AccessMethodsForNumber extends JDBCDatabaseMethods implements Value
 		try {
 			check(Permission.MODIFY, series);
 			policy.willDelete(series, t);
-			policy.delete(series, t);
+			policy.deleteValue(series, t);
 			delete_values_by_t = open(DELETE_VALUES_BY_T, series, delete_values_by_t);
 			delete_values_by_t.setInt(1, getId(series));
 			delete_values_by_t.setInt(2, t.asOffset());
