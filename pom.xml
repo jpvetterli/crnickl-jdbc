@@ -1,0 +1,159 @@
+<!--
+
+   Copyright 2012 Hauser Olsson GmbH
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>ch.agent</groupId>
+  <artifactId>crnickl-jdbc</artifactId>
+  <version>1.1.1</version>
+  <packaging>jar</packaging>
+  <name>JDBC implementation of the CrNiCKL database</name>
+  <url>http://agent.ch/timeseries/crnickl/</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.test.skip>true</maven.test.skip>
+  </properties>
+
+  <repositories>
+    <repository>
+      <!-- t2 and crnickl are not on a central repository yet -->
+      <id>jpvetterli on github.com</id>
+      <url>https://raw.github.com/jpvetterli/maven-repo/master/releases/</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/*.properties</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12.2</version>
+        <configuration>
+          <excludes>
+            <exclude>**/junit/T022_DeleteChronicleTest.java</exclude>
+           </excludes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2</version>
+         <executions>
+           <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8.1</version>
+        <configuration>
+          <stylesheetfile>javadoc.css</stylesheetfile>
+          <show>protected</show>
+          <nohelp>true</nohelp>
+        </configuration>
+        <!--executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions-->
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>ch.agent</groupId>
+      <artifactId>t2</artifactId>
+      <version>1.1.5</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.agent</groupId>
+      <artifactId>crnickl</artifactId>
+      <version>1.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>2.2.8</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>sqltool</artifactId>
+      <version>2.2.8</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+</project>
+

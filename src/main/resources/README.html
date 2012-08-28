@@ -1,0 +1,109 @@
+<h1>crnickl-jdbc : JDBC Implementation of the CrNiCKL Database </h1>
+
+<pre><code>Copyright 2012 Hauser Olsson GmbH.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+<hr />
+
+<p>This is a JDBC implementation of the CrNiCKL (chronicle) database. 
+CrNiCKL (pronounced "chronicle") is a database for time series written in 
+Java running on top of SQL and (soon) NoSQL systems.</p>
+
+<h2>Distribution</h2>
+
+<p>Starting with version 1.1.1, the distribution consists of a binary JAR with 
+compiled classes and of a source JAR:</p>
+
+<pre><code>crnickl-jdbc-&lt;version&gt;.jar
+crnickl-jdbc-&lt;version&gt;-sources.jar
+</code></pre>
+
+<p>In the file names <code>&lt;version&gt;</code> stands of course for the actual version,
+<code>1.1.1</code> for example. For earlier versions, the suffix of the source JAR 
+is <code>.source</code> instead of <code>-sources</code>.    </p>
+
+<h2>Dependencies</h2>
+
+<p>The software is built with maven; dependencies are defined in the <q>POM</q>
+file, included in the binary JAR:</p>
+
+<pre><code>/META-INF/maven/ch.agent/crnickl-jdbc/pom.xml
+</code></pre>
+
+<h2>Building the software</h2>
+
+<p>The recommended way is to use <a href="http://git-scm.com">git</a> for accessing the
+source and <a href="http://maven.apache.org/">maven</a> for building. The procedure 
+is easy, as maven takes care of locating and downloading dependencies:</p>
+
+<pre><code>$ git clone https://github.com/jpvetterli/crnickl-jdbc.git
+$ cd crnickl-jdbc
+$ mvn install
+</code></pre>
+
+<p>This builds and installs the distribution JARs in your local maven
+repository. They can also be found in the <code>target</code> directory.</p>
+
+<p>When building the software by other means, the following dependencies must be
+addressed:</p>
+
+<ul>
+<li><code>crnickl-&lt;version&gt;.jar</code> <a href="http://agent.ch/timeseries/crnickl/">CrNiCKL database</a></li>
+<li><code>t2-&lt;version&gt;.jar</code> <a href="http://agent.ch/timeseries/t2/">Time2 Library</a>  </li>
+</ul>
+
+<p>Versions numbers can be found in the <q>POM</q> file mentionned previously. </p>
+
+<h2>Unit tests</h2>
+
+<p>The following command runs unit tests:</p>
+
+<pre><code>$ mvn -Dmaven.test.skip=false test
+</code></pre>
+
+<p>When building the software without maven, the following 
+additional dependencies must be addressed to compile unit tests:</p>
+
+<ul>
+<li><code>hsqldb-&lt;version&gt;.jar</code> <a href="http://hsqldb.org/">HyperSQL Database</a></li>
+<li><code>sqltool-&lt;version&gt;.jar</code> <a href="http://hsqldb.org/">HyperSQL Database</a></li>
+</ul>
+
+<h2>Generating the documentation</h2>
+
+<p>If you are using maven, you can generate the javadocs with:</p>
+
+<pre><code>$ mvn javadoc:jar
+</code></pre>
+
+<p>The documentation is packed into a JAR located in the <code>target</code> directory
+and can be browsed by pointing at the file:</p>
+
+<pre><code>target/apidocs/index.html
+</code></pre>
+
+<h2>Browsing the source code</h2>
+
+<p>The source is available on GitHub at 
+<a href="http://github.com/jpvetterli/crnickl-jdbc.git">http://github.com/jpvetterli/crnickl-jdbc.git</a>.</p>
+
+<h2>Finding more information</h2>
+
+<p>More information on CrNiCKL is available at 
+<a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>.</p>
+
+<p><small>Updated: 2012-08-28/jpv</small></p>
+
+<p><link rel="stylesheet" type="text/css" href="README.css"/></p>

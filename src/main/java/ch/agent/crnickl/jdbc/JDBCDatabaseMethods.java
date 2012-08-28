@@ -22,6 +22,7 @@ package ch.agent.crnickl.jdbc;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.DBObject;
@@ -29,8 +30,6 @@ import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.impl.DatabaseMethodsImpl;
 import ch.agent.crnickl.jdbc.T2DBJMsg.J;
-
-import com.mysql.jdbc.Statement;
 
 /**
  * A JDBCDatabaseMethods object provides support for prepared statements. It is
