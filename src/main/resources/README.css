@@ -1,1 +1,4 @@
-../../../README.css
+hr {border-width: 0; border-top-width: 1;}
+body {background: lightgray; font-family: sans-serif;}
+pre {background: white; border: 1px dashed; padding: 10px; overflow: auto}
+code {font-family: monospace; font-size: 90%;}

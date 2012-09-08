@@ -18,32 +18,41 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>ch.agent</groupId>
   <artifactId>crnickl-jdbc</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <packaging>jar</packaging>
-  <name>JDBC implementation of the CrNiCKL database</name>
+  <name>CrNiCKL JDBC implementation</name>
+  <description>JDBC implementation of the CrNiCKL database manager for time series.</description>
   <url>http://agent.ch/timeseries/crnickl/</url>
 
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com:jpvetterli/crnickl-jdbc.git</connection>
+    <developerConnection>scm:git:git@github.com:jpvetterli/crnickl-jdbc.git</developerConnection>
+    <url>https://github.com/jpvetterli/crnickl-jdbc.git</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>jpv</id>
+      <name>Jean-Paul Vetterli</name>
+      <email>vetterli@gmail.com</email>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.test.skip>true</maven.test.skip>
   </properties>
-
-  <repositories>
-    <repository>
-      <!-- t2 and crnickl are not on a central repository yet -->
-      <id>jpvetterli on github.com</id>
-      <url>https://raw.github.com/jpvetterli/maven-repo/master/releases/</url>
-    </repository>
-  </repositories>
 
   <build>
     <resources>
@@ -105,31 +114,62 @@
           <show>protected</show>
           <nohelp>true</nohelp>
         </configuration>
-        <!--executions>
+        <executions>
           <execution>
             <id>attach-javadocs</id>
             <goals>
               <goal>jar</goal>
             </goals>
           </execution>
-        </executions-->
+        </executions>
       </plugin>
 
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>sign-artifacts-when-deploying</id>
+      <activation>
+        <property>
+          <name>gpg-sign</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <dependencies>
+
     <dependency>
       <groupId>ch.agent</groupId>
       <artifactId>t2</artifactId>
-      <version>1.1.5</version>
+      <version>1.1.6</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>ch.agent</groupId>
       <artifactId>crnickl</artifactId>
-      <version>1.1.1</version>
+      <version>1.1.2</version>
       <scope>compile</scope>
     </dependency>
 

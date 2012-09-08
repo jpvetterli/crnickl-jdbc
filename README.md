@@ -24,24 +24,29 @@ Java running on top of SQL and (soon) NoSQL systems.
 Distribution
 ------------
 
-Starting with version 1.1.1, the distribution consists of a binary JAR with 
-compiled classes and of a source JAR:
+Starting with version 1.1.2, the distribution consists of a binary JAR with 
+compiled classes, of a javadoc JAR and of a source JAR. For version x.y.z:
 
+	crnickl-jdbc-x.y.z.jar
+	crnickl-jdbc-x.y.z-javadoc.jar
+	crnickl-jdbc-x.y.z-sources.jar
 
-	crnickl-jdbc-<version>.jar
-	crnickl-jdbc-<version>-sources.jar
+For versions earlier than 1.1.2, there is no javadoc JAR. For versions earlier 
+than 1.1.1, the suffix of the source JAR is `.source` instead of `-sources`. 
 
-In the file names `<version>` stands of course for the actual version,
-`1.1.1` for example. For earlier versions, the suffix of the source JAR 
-is `.source` instead of `-sources`.    
+For Maven users
+---------------
 
-Dependencies
-------------
+Starting with version 1.1.2, the software is available from the central maven 
+repository. To use version x.y.z, insert the following dependency into your 
+`pom.xml` file:
 
-The software is built with maven; dependencies are defined in the <q>POM</q>
-file, included in the binary JAR:
-
-	/META-INF/maven/ch.agent/crnickl-jdbc/pom.xml
+    <dependency>
+      <groupId>ch.agent</groupId>
+      <artifactId>crnickl-jdbc</artifactId>
+      <version>x.y.z</version>
+      <scope>compile</scope>
+    </dependency>
 
 Building the software
 ---------------------
@@ -63,7 +68,10 @@ addressed:
 - `crnickl-<version>.jar` [CrNiCKL database](http://agent.ch/timeseries/crnickl/)
 - `t2-<version>.jar` [Time2 Library](http://agent.ch/timeseries/t2/)  
 
-Versions numbers can be found in the <q>POM</q> file mentionned previously. 
+Versions numbers can be found in the <q>POM</q> file included in the binary 
+JAR:
+
+	/META-INF/maven/ch.agent/crnickl-jdbc/pom.xml
 
 Unit tests
 ----------
@@ -78,18 +86,6 @@ additional dependencies must be addressed to compile unit tests:
 - `hsqldb-<version>.jar` [HyperSQL Database](http://hsqldb.org/)
 - `sqltool-<version>.jar` [HyperSQL Database](http://hsqldb.org/)
 
-Generating the documentation
-----------------------------
-
-If you are using maven, you can generate the javadocs with:
-
-	$ mvn javadoc:jar
-
-The documentation is packed into a JAR located in the `target` directory
-and can be browsed by pointing at the file:
-
-	target/apidocs/index.html
-
 Browsing the source code
 ------------------------
 
@@ -102,7 +98,7 @@ Finding more information
 More information on CrNiCKL is available at 
 <http://agent.ch/timeseries/crnickl/>.
 
-<small>Updated: 2012-08-28/jpv</small>
+<small>Updated: 2012-09-07/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 

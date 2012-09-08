@@ -23,23 +23,29 @@ Java running on top of SQL and (soon) NoSQL systems.</p>
 
 <h2>Distribution</h2>
 
-<p>Starting with version 1.1.1, the distribution consists of a binary JAR with 
-compiled classes and of a source JAR:</p>
+<p>Starting with version 1.1.2, the distribution consists of a binary JAR with 
+compiled classes, of a javadoc JAR and of a source JAR. For version x.y.z:</p>
 
-<pre><code>crnickl-jdbc-&lt;version&gt;.jar
-crnickl-jdbc-&lt;version&gt;-sources.jar
+<pre><code>crnickl-jdbc-x.y.z.jar
+crnickl-jdbc-x.y.z-javadoc.jar
+crnickl-jdbc-x.y.z-sources.jar
 </code></pre>
 
-<p>In the file names <code>&lt;version&gt;</code> stands of course for the actual version,
-<code>1.1.1</code> for example. For earlier versions, the suffix of the source JAR 
-is <code>.source</code> instead of <code>-sources</code>.    </p>
+<p>For versions earlier than 1.1.2, there is no javadoc JAR. For versions earlier 
+than 1.1.1, the suffix of the source JAR is <code>.source</code> instead of <code>-sources</code>. </p>
 
-<h2>Dependencies</h2>
+<h2>For Maven users</h2>
 
-<p>The software is built with maven; dependencies are defined in the <q>POM</q>
-file, included in the binary JAR:</p>
+<p>Starting with version 1.1.2, the software is available from the central maven 
+repository. To use version x.y.z, insert the following dependency into your 
+<code>pom.xml</code> file:</p>
 
-<pre><code>/META-INF/maven/ch.agent/crnickl-jdbc/pom.xml
+<pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;ch.agent&lt;/groupId&gt;
+  &lt;artifactId&gt;crnickl-jdbc&lt;/artifactId&gt;
+  &lt;version&gt;x.y.z&lt;/version&gt;
+  &lt;scope&gt;compile&lt;/scope&gt;
+&lt;/dependency&gt;
 </code></pre>
 
 <h2>Building the software</h2>
@@ -64,7 +70,11 @@ addressed:</p>
 <li><code>t2-&lt;version&gt;.jar</code> <a href="http://agent.ch/timeseries/t2/">Time2 Library</a>  </li>
 </ul>
 
-<p>Versions numbers can be found in the <q>POM</q> file mentionned previously. </p>
+<p>Versions numbers can be found in the <q>POM</q> file included in the binary 
+JAR:</p>
+
+<pre><code>/META-INF/maven/ch.agent/crnickl-jdbc/pom.xml
+</code></pre>
 
 <h2>Unit tests</h2>
 
@@ -81,19 +91,6 @@ additional dependencies must be addressed to compile unit tests:</p>
 <li><code>sqltool-&lt;version&gt;.jar</code> <a href="http://hsqldb.org/">HyperSQL Database</a></li>
 </ul>
 
-<h2>Generating the documentation</h2>
-
-<p>If you are using maven, you can generate the javadocs with:</p>
-
-<pre><code>$ mvn javadoc:jar
-</code></pre>
-
-<p>The documentation is packed into a JAR located in the <code>target</code> directory
-and can be browsed by pointing at the file:</p>
-
-<pre><code>target/apidocs/index.html
-</code></pre>
-
 <h2>Browsing the source code</h2>
 
 <p>The source is available on GitHub at 
@@ -104,6 +101,6 @@ and can be browsed by pointing at the file:</p>
 <p>More information on CrNiCKL is available at 
 <a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>.</p>
 
-<p><small>Updated: 2012-08-28/jpv</small></p>
+<p><small>Updated: 2012-09-07/jpv</small></p>
 
 <p><link rel="stylesheet" type="text/css" href="README.css"/></p>
