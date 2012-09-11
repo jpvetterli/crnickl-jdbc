@@ -57,7 +57,6 @@ public class T2DBJMsg extends KeyedMessage {
 		public static final String J10115 = "J10115"; 
 		public static final String J10116 = "J10116"; 
 		public static final String J10119 = "J10119"; 
-		public static final String J10120 = "J10120"; 
 		public static final String J10121 = "J10121"; 
 		public static final String J10122 = "J10122"; 
 		public static final String J10126 = "J10126"; 

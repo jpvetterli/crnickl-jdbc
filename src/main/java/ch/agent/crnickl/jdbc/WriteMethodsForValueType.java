@@ -28,7 +28,6 @@ import java.util.Set;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.ValueType;
-import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.Permission;
 import ch.agent.crnickl.impl.ValueTypeImpl;
 import ch.agent.crnickl.jdbc.T2DBJMsg.J;
@@ -46,8 +45,8 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	
 	private PreparedStatement create_valuetype;
 	private static final String CREATE_VALUETYPE = 
-		"insert into " + DB.VALUE_TYPE + " (label, restricted, builtin, scanner) " + 
-		"values(?, ?, ?, ?)";
+		"insert into " + DB.VALUE_TYPE + " (label, restricted, scanner) " + 
+		"values(?, ?, ?)";
 	/**
 	 * Create a value type in the database.
 	 * Throw an exception if the operation cannot be done.
@@ -63,8 +62,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			create_valuetype = open(CREATE_VALUETYPE, vt, create_valuetype);
 			create_valuetype.setString(1, vt.getName());
 			create_valuetype.setBoolean(2, vt.isRestricted());
-			create_valuetype.setBoolean(3, false);
-			create_valuetype.setString(4, ((ValueTypeImpl<?>)vt).getExternalRepresentation());
+			create_valuetype.setString(3, ((ValueTypeImpl<?>)vt).getExternalRepresentation());
 			surrogate = makeSurrogate(vt, executeAndGetNewId(create_valuetype));
 		} catch (Exception e) {
 			cause = e;
@@ -91,16 +89,11 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 		Throwable cause = null;
 		try {
 			check(Permission.MODIFY, vt);
-			if (vt.isBuiltIn())
-				throw T2DBJMsg.exception(J.J10120, vt.getName());
-			int id = getId(vt);
-			if (id <= DatabaseBackend.MAX_MAGIC_NR)
-				throw T2DBJMsg.exception(J.J10120, vt.getName());
 			int count = countProperties(vt);
 			if (count > 0)
 				throw T2DBJMsg.exception(J.J10119, vt.getName(), count);
 			delete_valuetype = open(DELETE_VALUETYPE, vt, delete_valuetype);
-			delete_valuetype.setInt(1, id);
+			delete_valuetype.setInt(1, getId(vt));
 			delete_valuetype.execute();
 			done = delete_valuetype.getUpdateCount() > 0;
 			if (done)

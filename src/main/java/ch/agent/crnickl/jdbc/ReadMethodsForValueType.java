@@ -48,7 +48,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 
 	private PreparedStatement select_valuetype_by_name;
 	private static final String SELECT_VALUETYPE_BY_NAME = 
-		"select id, restricted, builtin, scanner, lastmod "
+		"select id, restricted, scanner, lastmod "
 		+ "from " + DB.VALUE_TYPE + " where label = ?";
 	/**
 	 * Find a value type with a given name.
@@ -65,7 +65,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 			ResultSet rs = select_valuetype_by_name.executeQuery();
 			if (rs.next()) {
 				Surrogate surrogate = makeSurrogate(database, DBObjectType.VALUE_TYPE, rs.getInt(1));
-				return getValueType(surrogate, name, rs.getBoolean(2), rs.getString(4));
+				return getValueType(surrogate, name, rs.getBoolean(2), rs.getString(3));
 			} else
 				return null;
 		} catch (Exception e) {
@@ -77,7 +77,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 	
 	private PreparedStatement select_valuetype_by_pattern;
 	private static final String SELECT_VALUETYPE_BY_PATTERN = 
-		"select id, label, restricted, builtin, scanner, lastmod "
+		"select id, label, restricted, scanner, lastmod "
 		+ "from " + DB.VALUE_TYPE + " where label like ? order by label";
 	/**
 	 * Find a collection of value types with names matching a pattern.
@@ -98,7 +98,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 			ResultSet rs = select_valuetype_by_pattern.executeQuery();
 			while(rs.next()) {
 				Surrogate surrogate = makeSurrogate(database, DBObjectType.VALUE_TYPE, rs.getInt(1));
-				result.add(getValueType(surrogate, rs.getString(2), rs.getBoolean(3), rs.getString(5)));
+				result.add(getValueType(surrogate, rs.getString(2), rs.getBoolean(3), rs.getString(4)));
 			}
 			return result;
 		} catch (Exception e) {
@@ -110,7 +110,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 	
 	private PreparedStatement select_valuetype_by_id;
 	private static final String SELECT_VALUETYPE_BY_ID = 
-		"select label, restricted, builtin, scanner, lastmod "
+		"select label, restricted, scanner, lastmod "
 		+ "from " + DB.VALUE_TYPE + " where id = ?";
 	/**
 	 * Find a value type corresponding to a surrogate.
@@ -125,7 +125,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 			select_valuetype_by_id.setInt(1, getId(surrogate));
 			ResultSet rs = select_valuetype_by_id.executeQuery();
 			if (rs.next())
-				return getValueType(surrogate, rs.getString(1), rs.getBoolean(2), rs.getString(4));
+				return getValueType(surrogate, rs.getString(1), rs.getBoolean(2), rs.getString(3));
 			else
 				return null;
 		} catch (Exception e) {
