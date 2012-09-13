@@ -26,6 +26,8 @@ import java.sql.Statement;
 
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.DBObject;
+import ch.agent.crnickl.api.DBObjectId;
+import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.impl.DatabaseMethodsImpl;
@@ -41,17 +43,93 @@ import ch.agent.crnickl.jdbc.T2DBJMsg.J;
  * @version 1.0.0
  */
 public class JDBCDatabaseMethods extends DatabaseMethodsImpl {
+	
+	/**
+	 * Return the internal ID of a database object or 0 if the object is null or 
+	 * is <em>in construction</em>.
+	 * The internal ID is not exposed to clients.
+	 * <p>
+	 * This method is for use inside the JDBC implementation
+	 * and its argument must have a {@link DBObjectId} implemented
+	 * by {@link JDBCObjectId}.
+	 * 
+	 * @param dBObject a database object or null
+	 * @return a non negative integer
+	 */
+	public int getIdOrZero(DBObject dBObject) {
+		try {
+			if (dBObject != null && !dBObject.inConstruction())
+				return ((JDBCObjectId) dBObject.getId()).value();
+			else
+				return 0;
+		} catch(ClassCastException e) {
+			throw new RuntimeException("bug: " + dBObject.toString(), e);
+		}
+	}
+	
+	/**
+	 * Return the internal ID of a database object.
+	 * The internal ID is not exposed to clients.
+	 * <p>
+	 * This method is for use inside the JDBC implementation
+	 * and its argument must have a {@link DBObjectId} implemented
+	 * by {@link JDBCObjectId}.
+	 * 
+	 * @param dBObject a database object
+	 * @return a positive integer
+	 */
+	protected int getId(DBObject dBObject) {
+		int id = getIdOrZero(dBObject);
+		if (id < 1)
+			throw new RuntimeException("bug (database integrity violation)");
+		return id;
+	}
 
 	/**
+	 * Extract the internal ID of a database object from its surrogate.
+	 * The internal ID is not exposed to clients.
+	 * <p>
+	 * This method is for use inside the JDBC implementation
+	 * and its argument must have a {@link DBObjectId} implemented
+	 * by {@link JDBCObjectId}.
+	 * 
+	 * @param surrogate the surrogate of a database object
+	 * @return a positive integer
+	 */
+	public int getId(Surrogate surrogate) {
+		try {
+			int id = ((JDBCObjectId) surrogate.getId()).value();
+			if (id < 1)
+				throw new RuntimeException("bug (database integrity violation)");
+			return id;
+		} catch(ClassCastException e) {
+			throw new RuntimeException("bug: " + surrogate.toString(), e);
+		}
+
+	}
+	
+	/**
+	 * Create a surrogate for a database object.
+	 * 
+	 * @param db the database of the object
+	 * @param dot the type of the object
+	 * @param id the internal ID of the database object
+	 * @return a surrogate
+	 */
+	public Surrogate makeSurrogate(Database db, DBObjectType dot, int id) {
+		return super.makeSurrogate(db,  dot, new JDBCObjectId(id));
+	}
+	
+	/**
 	 * Execute a prepared statement of the "insertion" type and return the 
-	 * generated key.
+	 * generated id.
 	 * 
 	 * @param stmt a prepared statement
-	 * @return a generated key
+	 * @return a generated id
 	 * @throws T2DBException
 	 * @throws SQLException
 	 */
-	public int executeAndGetNewId(PreparedStatement stmt) throws T2DBException, SQLException {
+	public DBObjectId executeAndGetNewId(PreparedStatement stmt) throws T2DBException, SQLException {
 		int id = -1;
 		stmt.execute();
 		if (stmt.getUpdateCount() > 0) {
@@ -61,7 +139,7 @@ public class JDBCDatabaseMethods extends DatabaseMethodsImpl {
 		}
 		if (id < 0)
 			throw T2DBJMsg.exception(J.J00108);
-		return id;
+		return new JDBCObjectId(id);
 	}
 	
 	/**
@@ -158,6 +236,6 @@ public class JDBCDatabaseMethods extends DatabaseMethodsImpl {
 			throw T2DBJMsg.exception(e, J.J00102);
 		}
 	}
-	
+
 	
 }

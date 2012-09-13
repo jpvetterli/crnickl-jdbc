@@ -30,6 +30,7 @@ import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.UpdatableValueType;
 import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.SurrogateImpl;
+import ch.agent.crnickl.jdbc.JDBCObjectId;
 import ch.agent.t2.time.TimeDomain;
 
 public class T005_BasicTest extends TestCase {
@@ -38,6 +39,10 @@ public class T005_BasicTest extends TestCase {
 	private static boolean clean;
 	private static final String BASE = "bt.basictest";
 	private static final String ENTITY = "bt.basictest.test";
+	
+	private JDBCObjectId id(int id) {
+		return new JDBCObjectId(id);
+	}
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -198,7 +203,7 @@ public class T005_BasicTest extends TestCase {
 	 */
 	public void test14() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, 42);
+			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, id(42));
 			db.getSeries(k);
 			fail("exception expected");
 		} catch (T2DBException e) {
@@ -211,7 +216,7 @@ public class T005_BasicTest extends TestCase {
 	 */
 	public void test15() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, 42);
+			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, id(42));
 			db.getSchema(k);
 			fail("exception expected");
 		} catch (T2DBException e) {
@@ -224,7 +229,7 @@ public class T005_BasicTest extends TestCase {
 	 */
 	public void test16() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, 42);
+			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, id(42));
 			db.getProperty(k);
 			fail("exception expected");
 		} catch (T2DBException e) {
@@ -237,7 +242,7 @@ public class T005_BasicTest extends TestCase {
 	 */
 	public void test17() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, 42);
+			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, id(42));
 			db.getValueType(k);
 			fail("exception expected");
 		} catch (T2DBException e) {
@@ -250,7 +255,7 @@ public class T005_BasicTest extends TestCase {
 	 */
 	public void test18() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.SCHEMA, 42);
+			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.SCHEMA, id(42));
 			db.getChronicle(k);
 			fail("exception expected");
 		} catch (T2DBException e) {
@@ -265,11 +270,11 @@ public class T005_BasicTest extends TestCase {
 	 */
 	public void test19() {
 		try {
-			Property<?> nameProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, 1));
+			Property<?> nameProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, id(1)));
 			assertEquals("NAME", nameProp.getValueType().getExternalRepresentation());
-			Property<?> typeProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, 2));
+			Property<?> typeProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, id(2)));
 			assertEquals("TYPE", typeProp.getValueType().getExternalRepresentation());
-			Property<?> tdProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, 3));
+			Property<?> tdProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, id(3)));
 			assertEquals("TIMEDOMAIN", tdProp.getValueType().getExternalRepresentation());
 			assertFalse(nameProp.getValueType().isRestricted());
 			assertTrue(tdProp.getValueType().getValues().size() >= 5);
@@ -283,7 +288,7 @@ public class T005_BasicTest extends TestCase {
 	
 	public <S>void test20() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, 2);
+			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, id(2));
 			@SuppressWarnings("unchecked")
 			UpdatableValueType<S> vt = (UpdatableValueType<S>) db.getValueType(k).edit();
 			vt.addValue(vt.scan("foo"), null);
@@ -295,7 +300,7 @@ public class T005_BasicTest extends TestCase {
 	
 	public void test21() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, 3);
+			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, id(3));
 			UpdatableValueType<TimeDomain> vt = db.getValueType(k).typeCheck(TimeDomain.class).edit();
 			vt.updateValue(vt.scan("daily"), "new daily");
 		} catch (T2DBException e) {
@@ -305,7 +310,7 @@ public class T005_BasicTest extends TestCase {
 	
 	public void test22() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, 2);
+			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, id(2));
 			UpdatableValueType<TimeDomain> vt = db.getValueType(k).typeCheck(TimeDomain.class).edit();
 			vt.updateValue(vt.scan("daily"), "new daily");
 			fail("exception expected");
