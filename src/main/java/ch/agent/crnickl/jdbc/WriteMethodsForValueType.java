@@ -22,6 +22,8 @@ package ch.agent.crnickl.jdbc;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,7 +56,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	 * @param vt a value type
 	 * @throws T2DBException
 	 */
-	public void createValueType(ValueType<?> vt) throws T2DBException {
+	public <T>void createValueType(ValueType<T> vt) throws T2DBException {
 		Surrogate surrogate = null;
 		Throwable cause = null;
 		try {
@@ -62,8 +64,10 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			create_valuetype = open(CREATE_VALUETYPE, vt, create_valuetype);
 			create_valuetype.setString(1, vt.getName());
 			create_valuetype.setBoolean(2, vt.isRestricted());
-			create_valuetype.setString(3, ((ValueTypeImpl<?>)vt).getExternalRepresentation());
+			create_valuetype.setString(3, ((ValueTypeImpl<T>)vt).getExternalRepresentation());
 			surrogate = makeSurrogate(vt, executeAndGetNewId(create_valuetype));
+			vt.getSurrogate().upgrade(surrogate);
+			updateValues(null, vt);
 		} catch (Exception e) {
 			cause = e;
 		} finally {
@@ -71,7 +75,6 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 		}
 		if (surrogate == null || cause != null)
 			throw T2DBJMsg.exception(cause, J.J10114, vt.getName());
-		vt.getSurrogate().upgrade(surrogate);
 	}
 
 	private PreparedStatement delete_valuetype;
@@ -84,7 +87,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	 * @param vt a value type
 	 * @throws T2DBException
 	 */
-	public void deleteValueType(ValueType<?> vt) throws T2DBException {
+	public <T>void deleteValueType(ValueType<T> vt) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
@@ -92,12 +95,12 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			int count = countProperties(vt);
 			if (count > 0)
 				throw T2DBJMsg.exception(J.J10119, vt.getName(), count);
+			if (vt.isRestricted())
+				deleteValues(vt);
 			delete_valuetype = open(DELETE_VALUETYPE, vt, delete_valuetype);
 			delete_valuetype.setInt(1, getId(vt));
 			delete_valuetype.execute();
 			done = delete_valuetype.getUpdateCount() > 0;
-			if (done)
-				deleteValues(vt);
 		} catch (SQLException e) {
 			cause = e;
 		} finally {
@@ -117,16 +120,22 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	 * @param vt a value type
 	 * @throws T2DBException
 	 */
-	public void updateValueType(ValueType<?> vt) throws T2DBException {
+	public <T>void updateValueType(ValueType<T> vt) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
 			check(Permission.MODIFY, vt);
-			update_valuetype = open(UPDATE_VALUETYPE, vt, update_valuetype);
-			update_valuetype.setString(1, vt.getName());
-			update_valuetype.setInt(2, getId(vt));
-			update_valuetype.execute();
-			done = update_valuetype.getUpdateCount() > 0;
+			Surrogate s = vt.getSurrogate();
+			ValueType<T> original = 
+					((JDBCDatabase) s.getDatabase()).getReadMethodsForValueType().getValueType(s);
+			if (!original.getName().equals(vt.getName())) {
+				update_valuetype = open(UPDATE_VALUETYPE, vt, update_valuetype);
+				update_valuetype.setString(1, vt.getName());
+				update_valuetype.setInt(2, getId(vt));
+				update_valuetype.execute();
+				done = update_valuetype.getUpdateCount() > 0;
+			}
+			done |= updateValues(original, vt);
 		} catch (Exception e) {
 			cause = e;
 		} finally {
@@ -134,6 +143,39 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 		}
 		if (!done || cause != null)
 			throw T2DBJMsg.exception(cause, J.J10116, vt.getName());
+	}
+	
+	private <T>boolean updateValues(ValueType<T> original, ValueType<T> vt) throws T2DBException {
+		boolean done = false;
+		if (vt.isRestricted()) {
+			Map<T, String> added;
+			Set<T> deleted;
+			Map<T, String> edited;
+			Map<T, String> updates = vt.getValueDescriptions();
+			if (original == null) {
+				added = updates;
+				edited = new HashMap<T, String>();
+				deleted = new HashSet<T>();
+			} else {
+				Map<T, String> current = (Map<T, String>) original.getValueDescriptions();
+				Set<T> addedKeys = new HashSet<T>(updates.keySet());
+				addedKeys.removeAll(current.keySet());
+				added = new HashMap<T, String>();
+				for (T key : addedKeys) {
+					added.put(key, updates.get(key));
+				}
+				
+				deleted = new HashSet<T>(current.keySet());
+				deleted.removeAll(updates.keySet());
+				
+				edited = updates;
+				for (T key : addedKeys) {
+					edited.remove(key);
+				}
+			}
+			done = updateValueType(vt, added, edited, deleted);
+		}
+		return done;
 	}
 	
 	/**
@@ -145,22 +187,26 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	 * @param added a map of values to add and their descriptions
 	 * @param edited a map of values to modify and their descriptions
 	 * @param deleted a set of values to delete
+	 * @return true if anything done
 	 * @throws T2DBException
 	 */
-	@SuppressWarnings("unchecked")
-	public <T>void updateValueType(ValueType<T> vt, Map<T, String> added, Map<T, String> edited, Set<T> deleted) throws T2DBException {
-		check(Permission.MODIFY, vt);
-		for (Map.Entry<?, String> e : added.entrySet()) {
+	private <T>boolean updateValueType(ValueType<T> vt, Map<T, String> added, Map<T, String> edited, Set<T> deleted) throws T2DBException {
+		int count = 0;
+		for (Map.Entry<T, String> e : added.entrySet()) {
 			// don't use vt.toString at this point, check will fail 
-			insertValueTypeValue(vt, vt.getScanner().toString((T)e.getKey()), e.getValue());
+			insertValueTypeValue(vt, vt.getScanner().toString(e.getKey()), e.getValue());
+			count++;
 		}
-		for (Map.Entry<?, String> e : edited.entrySet()) {
+		for (Map.Entry<T, String> e : edited.entrySet()) {
 			// don't use vt.toString at this point, check will fail 
-			updateValueTypeValue(vt, vt.getScanner().toString((T)e.getKey()), e.getValue());
+			updateValueTypeValue(vt, vt.getScanner().toString(e.getKey()), e.getValue());
+			count++;
 		}
 		for (Object value : deleted) {
 			deleteValueTypeValue(vt, vt.toString(value));
+			count++;
 		}
+		return count > 0;
 	}
 	
 	private PreparedStatement insert_valuelist;

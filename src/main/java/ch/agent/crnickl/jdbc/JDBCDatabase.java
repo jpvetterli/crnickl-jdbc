@@ -22,8 +22,6 @@ package ch.agent.crnickl.jdbc;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 
 import ch.agent.crnickl.T2DBException;
@@ -358,12 +356,6 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 		publish(new UpdateEventImpl(UpdateEventOperation.MODIFY, valueType));
 	}
 
-	@Override
-	public <T>void update(UpdatableValueType<T> valueType, Map<T, String> added, Map<T, String> edited, Set<T> deleted) throws T2DBException {
-		getWriteMethodsForValueType().updateValueType(valueType, added, edited, deleted);
-		publish(new UpdateEventImpl(UpdateEventOperation.MODIFY, valueType));
-	}
-	
 	/*** Schemas ***/
 
 	/**
