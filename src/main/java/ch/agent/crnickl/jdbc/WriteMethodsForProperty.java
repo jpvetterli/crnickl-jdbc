@@ -110,7 +110,7 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 	private static final String UPDATE_PROPERTY = 
 		"update " + DB.PROPERTY + " set label = ? where id = ?";
 	/**
-	 * Update the name of the value type.
+	 * Update the name of the property.
 	 * If updating fails throw an exception.
 	 * 
 	 * @param property a property
