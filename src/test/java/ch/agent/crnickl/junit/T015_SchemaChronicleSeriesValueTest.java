@@ -22,6 +22,7 @@ package ch.agent.crnickl.junit;
 import java.util.Collection;
 
 import junit.framework.TestCase;
+import ch.agent.core.KeyedException;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Attribute;
@@ -52,6 +53,7 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			vt.addValue(vt.getScanner().scan("bar"), "it's bar");
 			vt.applyUpdates();
 			assertEquals("foo type", db.getValueType(vt.getSurrogate()).getName());
+			assertEquals("it's bar", db.getValueType(vt.getSurrogate()).getValueDescriptions().get("bar"));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
@@ -103,6 +105,18 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 		}
 	}
 	
+	public void test026_delete_value_type_in_use() {
+		try {
+			UpdatableValueType<String> type = db.getValueType("foo type").typeCheck(String.class).edit();
+			type.destroy();
+			type.applyUpdates();
+			fail("exception expected");
+		} catch (KeyedException e) {
+			assertEquals("J10115", e.getMsg().getKey());
+			assertEquals("J10119", ((KeyedException)e.getCause()).getMsg().getKey());
+		}
+	}
+	
 	public void test028_create_schema() {
 		try {
 			UpdatableSchema schema = db.createSchema("foo schema", null);
@@ -144,7 +158,7 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			s.setValue(Day.DOMAIN.time("2011-06-30"), 42.);
 			s.applyUpdates();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -160,7 +174,7 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			s.setValue(Day.DOMAIN.time("2011-06-30"), Double.NaN);
 			s.applyUpdates();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -212,6 +226,23 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 		}
 	}
 	
+	public void test050_delete_value_type_value_in_use() {
+		try {
+			UpdatableValueType<String> type = db.getValueType("foo type").typeCheck(String.class).edit();
+			type.deleteValue("baz");
+			type.applyUpdates();
+			fail("exception expected");
+		} catch (KeyedException e) {
+			assertEquals("J10116", e.getMsg().getKey());
+			try {
+				assertEquals("J10128", ((KeyedException)e.getCause()).getMsg().getKey());
+			} catch (Exception e1) {
+				// oops!
+				fail(e.getCause().getMessage());
+			}
+		}
+	}
+
 	public void test052_get_attribute() {
 		try {
 			Chronicle ent = db.getChronicle("bt.fooent", true);

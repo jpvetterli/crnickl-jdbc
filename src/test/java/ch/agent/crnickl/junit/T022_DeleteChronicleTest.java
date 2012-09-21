@@ -39,7 +39,7 @@ public class T022_DeleteChronicleTest extends TestCase {
 			ent.destroy();
 			ent.applyUpdates();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}

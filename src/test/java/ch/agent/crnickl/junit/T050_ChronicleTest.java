@@ -57,7 +57,7 @@ public class T050_ChronicleTest extends TestCase {
 			assertEquals(FULLNAME, testEntity.getName(true));
 //			db.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}

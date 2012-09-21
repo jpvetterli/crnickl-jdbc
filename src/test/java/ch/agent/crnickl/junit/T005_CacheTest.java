@@ -83,7 +83,7 @@ public class T005_CacheTest extends TestCase {
 			assertEquals(su3, su4);
 			db.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		} finally {
 			

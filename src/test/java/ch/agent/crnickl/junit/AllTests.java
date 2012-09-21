@@ -32,6 +32,8 @@ public class AllTests {
 		suite.addTestSuite(T006_ChronicleTest_StrictMode.class);
 		suite.addTestSuite(T006_ChronicleTest_NonStrictMode.class);
 		if (DBSetUp.inMemory()) {
+			suite.addTestSuite(T012_ValueTypeTest.class);
+			suite.addTestSuite(T013_PropertyTest.class);
 			suite.addTestSuite(T015_SchemaChronicleSeriesValueTest.class);
 			suite.addTestSuite(T017_SchemaTest.class);
 		}

@@ -92,7 +92,7 @@ public class T060_ByAttributeValueTest extends TestCase {
 			
 			db.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}

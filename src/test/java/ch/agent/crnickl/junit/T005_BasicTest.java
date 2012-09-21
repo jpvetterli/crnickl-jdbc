@@ -65,7 +65,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e = db.getChronicle(BASE, true);
 			assertEquals(BASE, e.getName(true));
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -85,7 +85,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1, e2);
 		} catch (T2DBException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -96,7 +96,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1.getSchema(true), e2.getSchema(true));
 		} catch (T2DBException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -107,7 +107,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1.getCollection(), e2.getCollection());
 		} catch (T2DBException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -182,7 +182,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1.getSchema(true), e2.getSchema(true));
 		} catch (T2DBException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -193,7 +193,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1.getCollection(), e2.getCollection());
 		} catch (T2DBException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -281,7 +281,7 @@ public class T005_BasicTest extends TestCase {
 			if (DBSetUp.inMemory())
 				assertEquals(1, typeProp.getValueType().getValues().size()); // "number" defined in the DDL
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.toString());
 		}
 	}

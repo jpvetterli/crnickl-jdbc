@@ -97,6 +97,7 @@ public class T040_SeriesTest extends TestCase {
 			assertEquals(SERIES, s.getName(true));
 			assertTrue(s.getSurrogate().inConstruction());
 		} catch (Exception e) {
+//			e.printStackTrace();
 			fail(e.toString());
 		}
 	}
@@ -167,7 +168,7 @@ public class T040_SeriesTest extends TestCase {
 			db.commit();
 			assertEquals(42.0, s.getValue(t));
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail(e.toString());
 		}
 	}

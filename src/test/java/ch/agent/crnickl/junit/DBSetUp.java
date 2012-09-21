@@ -41,6 +41,7 @@ public class DBSetUp {
 
 	private static final String DDL = "sql/HyperSQL_DDL_base.sql";
 	public static boolean MEMORY_DB = true;
+	public static boolean STANDARD_REGEXP = false;
 	public static String MYSQL_PARM_FILE = null;
 	// many test cases do not work well against existing database because of "leftovers"
 	// but the setup is okay with this file for example: "/home/jp/A-WORK/tsm/tsm-JDBC-3312.parm";
