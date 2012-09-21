@@ -101,7 +101,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			delete_valuetype.setInt(1, getId(vt));
 			delete_valuetype.execute();
 			done = delete_valuetype.getUpdateCount() > 0;
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			cause = e;
 		} finally {
 			delete_valuetype = close(delete_valuetype);
