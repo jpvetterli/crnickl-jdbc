@@ -205,7 +205,9 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 				create_schema_component.setString(5, "");
 				create_schema_component.setString(6, "");
 			} else {
-				Property<?> prop = def.getProperty();
+				Database database = schema.getSurrogate().getDatabase();
+				Property<?> prop = ((JDBCDatabase)database).getReadMethodsForProperty().
+						getProperty(def.getProperty().getSurrogate());
 				if (prop == null)
 					throw T2DBJMsg.exception(J.J30130);
 				create_schema_component.setInt(4, getId(prop));

@@ -96,13 +96,10 @@ public class T017_SchemaTest extends TestCase {
 	
 	public void test13_create_schema() {
 		try {
-			/*
-			 * why commit/rollback ?
-			 * commit: because subsequent tests need properties etc. created previously
-			 * rollback: because this test would leave an incomplete schema1 behind
-			 */
-			db.commit();
 			UpdatableSchema schema = db.createSchema("schema1", null);
+			Collection<Schema> ss = db.getSchemas("schema1");
+			assertEquals(0,  ss.size());
+
 			schema.addAttribute(1);
 			schema.setAttributeProperty(1, db.getProperty("prop1", true));
 			schema.setAttributeDefault(1, "t1v1");
@@ -111,13 +108,7 @@ public class T017_SchemaTest extends TestCase {
 			schema.applyUpdates();
 			fail("exception expected");
 		} catch (Exception e) {
-			assertEquals("J30124",  ((KeyedException)e.getCause()).getMsg().getKey());
-			try {
-				db.rollback();
-				Collection<Schema> ss = db.getSchemas("schema1");
-				assertEquals(0,  ss.size());
-			} catch (Exception e1) {
-			}
+			assertEquals("D30134",  ((KeyedException)e.getCause()).getMsg().getKey());
 		}
 	}
 
@@ -196,13 +187,8 @@ public class T017_SchemaTest extends TestCase {
 	
 	public void test31_edit_schema() {
 		try {
-			
 			UpdatableSchema schema3 = db.createSchema("schema3", null);
-//			schema3.addAttribute(1);
-//			schema3.setAttributeProperty(1, db.getProperty("prop1", true));
-//			schema3.setAttributeDefault(1, "t1v1");
 			schema3.applyUpdates();
-			
 			UpdatableSchema schema1 = db.getSchemas("schema1a").iterator().next().edit();
 			schema1.setBase(schema3);
 			schema1.applyUpdates();
@@ -259,7 +245,7 @@ public class T017_SchemaTest extends TestCase {
 			schema1.applyUpdates();
 			fail("exception expected");
 		} catch (Exception e) {
-			assertEquals("D30110",  ((KeyedException) e).getMsg().getKey());
+			assertEquals("D30110",  ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 	
@@ -323,7 +309,7 @@ public class T017_SchemaTest extends TestCase {
 			sch1.applyUpdates();
 			fail("exception expected");
 		} catch (KeyedException e) {
-			assertEquals("D30150",  ((KeyedException) e).getMsg().getKey());
+			assertEquals("D30150",  ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 
@@ -340,7 +326,7 @@ public class T017_SchemaTest extends TestCase {
 			sch1.applyUpdates();
 			fail("exception expected");
 		} catch (KeyedException e) {
-			assertEquals("D30150",  ((KeyedException) e).getMsg().getKey());
+			assertEquals("D30150",  ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 	
@@ -353,7 +339,7 @@ public class T017_SchemaTest extends TestCase {
 			schema4.applyUpdates();
 			fail("exception expected");
 		} catch (KeyedException e) {
-			assertEquals("D30150",  ((KeyedException) e).getMsg().getKey());
+			assertEquals("D30150",  ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 
@@ -391,7 +377,7 @@ public class T017_SchemaTest extends TestCase {
 			schema.applyUpdates();
 			fail("exception expected");
 		} catch (KeyedException e) {
-			assertEquals("D30146",  ((KeyedException) e).getMsg().getKey());
+			assertEquals("D30146",  ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 	
@@ -413,7 +399,7 @@ public class T017_SchemaTest extends TestCase {
 			schema1.applyUpdates();
 			fail("exception expected");
 		} catch (KeyedException e) {
-			assertEquals("D30146",  ((KeyedException) e).getMsg().getKey());
+			assertEquals("D30146",  ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 	public void test35J_edit_schema() {
@@ -428,7 +414,7 @@ public class T017_SchemaTest extends TestCase {
 			schema3.applyUpdates();
 			fail("exception expected");
 		} catch (KeyedException e) {
-			assertEquals("D30146",  ((KeyedException) e).getMsg().getKey());
+			assertEquals("D30146",  ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 
