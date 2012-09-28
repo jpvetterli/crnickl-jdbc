@@ -31,6 +31,7 @@ import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.DatabaseConfiguration;
 import ch.agent.crnickl.api.Property;
+import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.Series;
 import ch.agent.crnickl.api.SeriesDefinition;
 import ch.agent.crnickl.api.Surrogate;
@@ -43,7 +44,7 @@ import ch.agent.crnickl.api.UpdateEventOperation;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.DatabaseBackendImpl;
-import ch.agent.crnickl.impl.UpdatableSchemaImpl;
+import ch.agent.crnickl.impl.SchemaUpdatePolicy;
 import ch.agent.crnickl.impl.UpdateEventImpl;
 import ch.agent.crnickl.impl.UpdateEventPublisherImpl;
 import ch.agent.crnickl.jdbc.T2DBJMsg.J;
@@ -71,6 +72,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	private ReadMethodsForSchema sRMethods;
 	private WriteMethodsForSchema sWMethods;
 	private JDBCSession session;
+	private JDBCSchemaUpdatePolicy jsup;
 	
 	/**
 	 * Construct a {@link DatabaseBackend}.
@@ -87,7 +89,14 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 		super.configure(configuration);
 		setAccessMethods(ValueType.StandardValueType.NUMBER.name(), new AccessMethodsForNumber());
 	}
-	
+
+	@Override
+	public SchemaUpdatePolicy getSchemaUpdatePolicy() {
+		if (jsup == null)
+			jsup = new JDBCSchemaUpdatePolicy(this);
+		return jsup;
+	}
+
 	/*** manage back end store ***/
 
 	/**
@@ -279,14 +288,14 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 
 	@Override
 	public void deleteProperty(UpdatableProperty<?> property) throws T2DBException {
-		getWriteMethodsForProperty().deleteProperty(property);
+		getWriteMethodsForProperty().deleteProperty(property, getSchemaUpdatePolicy());
 		String comment = property.getName();
 		publish(new UpdateEventImpl(UpdateEventOperation.DELETE, property).withComment(comment));
 	}
 
 	@Override
 	public void update(UpdatableProperty<?> property) throws T2DBException {
-		getWriteMethodsForProperty().updateProperty(property);
+		getWriteMethodsForProperty().updateProperty(property, getSchemaUpdatePolicy());
 		publish(new UpdateEventImpl(UpdateEventOperation.MODIFY, property));
 	}
 	
@@ -345,14 +354,14 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 
 	@Override
 	public void deleteValueType(UpdatableValueType<?> valueType) throws T2DBException {
-		getWriteMethodsForValueType().deleteValueType(valueType);
+		getWriteMethodsForValueType().deleteValueType(valueType, getSchemaUpdatePolicy());
 		String comment = valueType.getName();
 		publish(new UpdateEventImpl(UpdateEventOperation.DELETE, valueType).withComment(comment));
 	}
 
 	@Override
 	public void update(UpdatableValueType<?> valueType) throws T2DBException {
-		getWriteMethodsForValueType().updateValueType(valueType);
+		getWriteMethodsForValueType().updateValueType(valueType, getSchemaUpdatePolicy());
 		publish(new UpdateEventImpl(UpdateEventOperation.MODIFY, valueType));
 	}
 
@@ -395,56 +404,36 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 
 	@Override
 	public void create(UpdatableSchema schema) throws T2DBException {
-		UpdatableSchema base = schema.getBase();
-		getWriteMethodsForSchema().createSchema((UpdatableSchemaImpl) schema, base);
+		getWriteMethodsForSchema().createSchema(schema);
 		publish(new UpdateEventImpl(UpdateEventOperation.CREATE, schema));
 	}
 
 	@Override
-	public void create(UpdatableSchema schema, int seriesNr, String description, AttributeDefinition<?> def) throws T2DBException {
-		getWriteMethodsForSchema().createSchemaComponent((UpdatableSchemaImpl) schema, seriesNr, description, def);
+	public void update(UpdatableSchema schema) throws T2DBException {
+		getWriteMethodsForSchema().updateSchema(schema);
+		((UpdateEventPublisherImpl)getUpdateEventPublisher()).publish(new UpdateEventImpl(UpdateEventOperation.MODIFY, schema), false);
 	}
-
-	@Override
-	public boolean update(UpdatableSchema schema, UpdatableSchema base, String name) throws T2DBException {
-		return getWriteMethodsForSchema().updateSchema((UpdatableSchemaImpl) schema, base, name);
-	}
-
-	@Override
-	public void update(UpdatableSchema schema, int seriesNr, String description, AttributeDefinition<?> def) throws T2DBException {
-		getWriteMethodsForSchema().updateSchemaComponent(schema, seriesNr, description, def);
-	}
-
-	@Override
-	public void deleteAttributeInSchema(UpdatableSchema schema, int seriesNr, int attribNr) throws T2DBException {
-		getWriteMethodsForSchema().deleteSchemaComponent(schema, seriesNr, attribNr);
-	}
-
-	@Override
-	public void deleteSeriesInSchema(UpdatableSchema schema, int seriesNr) throws T2DBException {
-		getWriteMethodsForSchema().deleteSchemaComponents(schema, seriesNr);
-	}
-
+		
 	@Override
 	public void deleteSchema(UpdatableSchema schema) throws T2DBException {
-		getWriteMethodsForSchema().deleteSchema((UpdatableSchemaImpl) schema, getSchemaUpdatePolicy());
+		getWriteMethodsForSchema().deleteSchema(schema);
 		String comment = schema.getName();
 		publish(new UpdateEventImpl(UpdateEventOperation.DELETE, schema).withComment(comment));
 	}
 	
 	@Override
-	public Collection<Surrogate> findChronicles(Collection<UpdatableSchema> schemas) throws T2DBException {
-		return getWriteMethodsForSchema().findChronicles(schemas);
+	public Collection<Surrogate> findChronicles(Schema schema) throws T2DBException {
+		return getWriteMethodsForSchema().findChronicles(schema);
 	}
 
 	@Override
-	public Collection<Surrogate> findChronicles(Property<?> property, Collection<UpdatableSchema> schemas) throws T2DBException {
+	public Collection<Surrogate> findChronicles(Property<?> property, Schema schemas) throws T2DBException {
 		return getWriteMethodsForSchema().findChronicles(property, schemas);
 	}
 
 	@Override
-	public Collection<Surrogate> findChronicles(SeriesDefinition ss, Collection<UpdatableSchema> schemas) throws T2DBException {
-		return getWriteMethodsForSchema().findChronicles(ss, schemas);
+	public Collection<Surrogate> findChronicles(SeriesDefinition ss, Schema schema) throws T2DBException {
+		return getWriteMethodsForSchema().findChronicles(ss, schema);
 	}
 
 	@Override

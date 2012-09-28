@@ -169,6 +169,7 @@ public class T012_ValueTypeTest extends TestCase {
 			vt.applyUpdates();
 			fail("exception expected");
 		} catch (KeyedException e) {
+//			e.printStackTrace();
 			assertEquals("D10123", e.getMsg().getKey());
 		}
 	}
@@ -181,6 +182,7 @@ public class T012_ValueTypeTest extends TestCase {
 			vt.applyUpdates();
 			fail("exception expected");
 		} catch (KeyedException e) {
+//			e.printStackTrace();
 			assertEquals("D10122", e.getMsg().getKey());
 		}
 	}

@@ -20,7 +20,6 @@
 package ch.agent.crnickl.jdbc;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +30,7 @@ import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.Permission;
+import ch.agent.crnickl.impl.SchemaUpdatePolicy;
 import ch.agent.crnickl.impl.ValueTypeImpl;
 import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
@@ -67,7 +67,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			create_valuetype.setString(3, ((ValueTypeImpl<T>)vt).getExternalRepresentation());
 			surrogate = makeSurrogate(vt, executeAndGetNewId(create_valuetype));
 			vt.getSurrogate().upgrade(surrogate);
-			updateValues(null, vt);
+			updateValues(null, vt, null);
 		} catch (Exception e) {
 			cause = e;
 		} finally {
@@ -85,16 +85,15 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	 * Throw an exception if the operation cannot be done.
 	 * 
 	 * @param vt a value type
+	 * @param policy a schema udpdating policy
 	 * @throws T2DBException
 	 */
-	public <T>void deleteValueType(ValueType<T> vt) throws T2DBException {
+	public <T>void deleteValueType(ValueType<T> vt, SchemaUpdatePolicy policy) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
 			check(Permission.MODIFY, vt);
-			int count = countProperties(vt);
-			if (count > 0)
-				throw T2DBJMsg.exception(J.J10119, vt.getName(), count);
+			policy.willDelete(vt);
 			if (vt.isRestricted())
 				deleteValues(vt);
 			delete_valuetype = open(DELETE_VALUETYPE, vt, delete_valuetype);
@@ -118,9 +117,10 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	 * Throw an exception if the operation cannot be done.
 	 * 
 	 * @param vt a value type
+	 * @param policy a schema udpdating policy
 	 * @throws T2DBException
 	 */
-	public <T>void updateValueType(ValueType<T> vt) throws T2DBException {
+	public <T>void updateValueType(ValueType<T> vt, SchemaUpdatePolicy policy) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
@@ -135,7 +135,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 				update_valuetype.execute();
 				done = update_valuetype.getUpdateCount() > 0;
 			}
-			done |= updateValues(original, vt);
+			done |= updateValues(original, vt, policy);
 		} catch (Exception e) {
 			cause = e;
 		} finally {
@@ -145,7 +145,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			throw T2DBJMsg.exception(cause, J.J10116, vt.getName());
 	}
 	
-	private <T>boolean updateValues(ValueType<T> original, ValueType<T> vt) throws T2DBException {
+	private <T>boolean updateValues(ValueType<T> original, ValueType<T> vt, SchemaUpdatePolicy policy) throws T2DBException {
 		boolean done = false;
 		if (vt.isRestricted()) {
 			Map<T, String> added;
@@ -173,7 +173,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 					edited.remove(key);
 				}
 			}
-			done = updateValueType(vt, added, edited, deleted);
+			done = updateValueType(vt, added, edited, deleted, policy);
 		}
 		return done;
 	}
@@ -187,10 +187,11 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	 * @param added a map of values to add and their descriptions
 	 * @param edited a map of values to modify and their descriptions
 	 * @param deleted a set of values to delete
+	 * @param policy update policy
 	 * @return true if anything done
 	 * @throws T2DBException
 	 */
-	private <T>boolean updateValueType(ValueType<T> vt, Map<T, String> added, Map<T, String> edited, Set<T> deleted) throws T2DBException {
+	private <T>boolean updateValueType(ValueType<T> vt, Map<T, String> added, Map<T, String> edited, Set<T> deleted, SchemaUpdatePolicy policy) throws T2DBException {
 		int count = 0;
 		for (Map.Entry<T, String> e : added.entrySet()) {
 			// don't use vt.toString at this point, check will fail 
@@ -202,8 +203,8 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			updateValueTypeValue(vt, vt.getScanner().toString(e.getKey()), e.getValue());
 			count++;
 		}
-		for (Object value : deleted) {
-			deleteValueTypeValue(vt, vt.toString(value));
+		for (T value : deleted) {
+			deleteValueTypeValue(vt, value, policy);
 			count++;
 		}
 		return count > 0;
@@ -281,23 +282,20 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 	 * @param name
 	 * @param id
 	 * @param value
+	 * @param policy update policy or null (when creating)
 	 * @throws T2DBException
 	 */
-	private <T>void deleteValueTypeValue(ValueType<T> vt, String value) throws T2DBException {
+	private <T>void deleteValueTypeValue(ValueType<T> vt, T value, SchemaUpdatePolicy policy) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		String name = vt.getName();
 		try {
 			int id = getId(vt);
-			int count = countDefaultValues(vt, value);
-			if (count > 0)
-				throw T2DBJMsg.exception(J.J10127, name, value, count);
-			count = countActualValues(vt, value);
-			if (count > 0)
-				throw T2DBJMsg.exception(J.J10128, name, value, count);
+			if (policy != null)	
+				policy.willDelete(vt, value);
 			delete_valuelist = open(DELETE_VALUELIST, vt, delete_valuelist);
 			delete_valuelist.setInt(1, id);
-			delete_valuelist.setString(2, value);
+			delete_valuelist.setString(2, vt.toString(value));
 			delete_valuelist.execute();
 			done = delete_valuelist.getUpdateCount() > 0;
 		} catch (SQLException e) {
@@ -309,55 +307,6 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			throw T2DBJMsg.exception(cause, J.J10126, name, value);
 	}
 
-	private PreparedStatement count_property;
-	private static final String COUNT_PROPERTY = 
-		"select count(*) from " + DB.PROPERTY + " where type = ?";
-	private int countProperties(ValueType<?> vt) throws T2DBException,	SQLException {
-		try {
-			count_property = open(COUNT_PROPERTY, vt, count_property);
-			count_property.setInt(1, getId(vt));
-			ResultSet rs = count_property.executeQuery();
-			rs.next();
-			return rs.getInt(1);
-		} finally {
-			count_property = close(count_property);
-		}
-	}
-	
-	private PreparedStatement count_default_values;
-	private static final String COUNT_DEFAULT_VALUES = 
-		"select count(*) from " + DB.SCHEMA_ITEM + " s, " + DB.PROPERTY + " p " + 
-		"where s.prop = p.id and p.type = ? and s.value = ?";
-	private <T> int countDefaultValues(ValueType<T> vt, String value) throws T2DBException, SQLException {
-		try {
-			count_default_values = open(COUNT_DEFAULT_VALUES, vt, count_default_values);
-			count_default_values.setInt(1, getId(vt));
-			count_default_values.setString(2, value);
-			ResultSet rs = count_default_values.executeQuery();
-			rs.next();
-			return rs.getInt(1);
-		} finally {
-			count_default_values = close(count_default_values);
-		}
-	}
-	
-	private PreparedStatement count_actual_values;
-	private static final String COUNT_ACTUAL_VALUES = 
-		"select count(*) from " + DB.PROPERTY + " p, " + DB.ATTRIBUTE_VALUE + " a " + 
-		" where a.value = ? and p.type = ? and p.id = a.prop";
-	private <T>int countActualValues(ValueType<T> vt, String value) throws T2DBException, SQLException {
-		try {
-			count_actual_values = open(COUNT_ACTUAL_VALUES, vt, count_actual_values);
-			count_actual_values.setString(1, value);
-			count_actual_values.setInt(2, getId(vt));
-			ResultSet rs = count_actual_values.executeQuery();
-			rs.next();
-			return rs.getInt(1);
-		} finally {
-			count_actual_values = close(count_actual_values);
-		}
-	}
-	
 	private PreparedStatement delete_values;
 	private static final String DELETE_VALUES = 
 		"delete from " + DB.VALUE_TYPE_VALUE + " where type = ?";

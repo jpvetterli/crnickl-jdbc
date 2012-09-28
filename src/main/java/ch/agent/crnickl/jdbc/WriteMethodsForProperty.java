@@ -20,7 +20,6 @@
 package ch.agent.crnickl.jdbc;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import ch.agent.crnickl.T2DBException;
@@ -29,6 +28,7 @@ import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.Permission;
+import ch.agent.crnickl.impl.SchemaUpdatePolicy;
 import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
@@ -80,9 +80,10 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 	 * If deleting fails throw an exception.
 	 * 
 	 * @param property a property
+	 * @param policy a schema updating policy
 	 * @throws T2DBException
 	 */
-	public void deleteProperty(Property<?> property) throws T2DBException {
+	public void deleteProperty(Property<?> property, SchemaUpdatePolicy policy) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
@@ -90,9 +91,7 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 			int id = getId(property);
 			if (id <= DatabaseBackend.MAX_MAGIC_NR)
 				throw T2DBJMsg.exception(J.J20120, property.getName());
-			int count = countSlots(property);
-			if (count > 0)
-				throw T2DBJMsg.exception(J.J20119, property.getName(), count);
+			policy.willDelete(property);
 			delete_property = open(DELETE_PROPERTY, property, delete_property);
 			delete_property.setInt(1, id);
 			delete_property.execute();
@@ -114,9 +113,10 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 	 * If updating fails throw an exception.
 	 * 
 	 * @param property a property
+	 * @param policy a schema updating policy
 	 * @throws T2DBException
 	 */
-	public void updateProperty(Property<?> property) throws T2DBException {
+	public void updateProperty(Property<?> property, SchemaUpdatePolicy policy) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
@@ -133,21 +133,6 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 		}
 		if (!done || cause != null)
 			throw T2DBJMsg.exception(cause, J.J20116, property.getName());
-	}
-	
-	private PreparedStatement count_slot;
-	private static final String COUNT_SLOT = 
-		"select count(*) from " + DB.SCHEMA_ITEM + " where prop = ?";
-	private int countSlots(Property<?> property) throws T2DBException, SQLException {
-		try {
-			count_slot = open(COUNT_SLOT, property, count_slot);
-			count_slot.setInt(1, getId(property));
-			ResultSet rs = count_slot.executeQuery();
-			rs.next();
-			return rs.getInt(1);
-		} finally {
-			count_slot = close(count_slot);
-		}
 	}
 	
 }

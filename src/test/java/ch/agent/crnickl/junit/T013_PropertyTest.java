@@ -188,7 +188,6 @@ public class T013_PropertyTest extends TestCase {
 			vt.applyUpdates();
 			db.getProperty("bar property", false);
 		} catch (Exception e) {
-//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}

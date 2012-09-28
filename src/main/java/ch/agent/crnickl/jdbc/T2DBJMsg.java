@@ -51,6 +51,7 @@ public class T2DBJMsg extends KeyedMessage {
 		public static final String J10104 = "J10104";
 		public static final String J10105 = "J10105";
 		public static final String J10106 = "J10106";
+		public static final String J10107 = "J10107";
 		public static final String J10109 = "J10109"; 
 		public static final String J10110 = "J10110"; 
 		public static final String J10114 = "J10114"; 
@@ -66,6 +67,7 @@ public class T2DBJMsg extends KeyedMessage {
 		public static final String J20104 = "J20104"; 
 		public static final String J20105 = "J20105"; 
 		public static final String J20106 = "J20106"; 
+		public static final String J20107 = "J20107"; 
 		public static final String J20109 = "J20109"; 
 		public static final String J20114 = "J20114"; 
 		public static final String J20115 = "J20115"; 
@@ -77,7 +79,6 @@ public class T2DBJMsg extends KeyedMessage {
 		public static final String J30105 = "J30105"; 
 		public static final String J30109 = "J30109"; 
 		public static final String J30114 = "J30114"; 
-		public static final String J30115 = "J30115"; 
 		public static final String J30116 = "J30116"; 
 		public static final String J30117 = "J30117";
 		public static final String J30122 = "J30122";

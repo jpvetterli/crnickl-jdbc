@@ -23,8 +23,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.AttributeDefinition;
@@ -35,9 +33,11 @@ import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.SeriesDefinition;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.UpdatableSchema;
+import ch.agent.crnickl.impl.AttributeDefinitionImpl;
+import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.Permission;
-import ch.agent.crnickl.impl.SchemaUpdatePolicy;
 import ch.agent.crnickl.impl.UpdatableSchemaImpl;
+import ch.agent.crnickl.impl.UpdatableSchemaVisitor;
 import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
@@ -48,7 +48,68 @@ import ch.agent.crnickl.jdbc.T2DBJMsg.J;
  */
 public class WriteMethodsForSchema extends ReadMethodsForSchema {
 
+	private static class Visitor implements UpdatableSchemaVisitor {
+
+		private WriteMethodsForSchema m;
+
+		private Visitor(WriteMethodsForSchema methods) {
+			this.m = methods;
+		}
+
+		@Override
+		public void visit(UpdatableSchema schema, SeriesDefinition def,
+				SeriesDefinition original) throws T2DBException {
+			if (def == null) {
+				// delete series definition
+				m.deleteSchemaComponents(schema, original.getNumber());
+			} else {
+				if (def.isErasing()) {
+					AttributeDefinitionImpl<String> attribDef = new AttributeDefinitionImpl<String>(
+							DatabaseBackend.MAGIC_NAME_NR, null, null);
+					attribDef.edit();
+					attribDef.setErasing(true);
+					if (original == null) {
+						// create erasing series
+						m.createSchemaComponent(schema, def.getNumber(), null, attribDef);
+					} else {
+						// update series to erasing
+						if (!original.isErasing())
+							m.updateSchemaComponent(schema, def.getNumber(), null, attribDef);
+					}
+				}
+				// description taken care of in the other visit() method
+			}
+		}
+
+		@Override
+		public void visit(UpdatableSchema schema, SeriesDefinition seriesDef,
+				AttributeDefinition<?> attrDef,
+				AttributeDefinition<?> origAttrDef) throws T2DBException {
+			int seriesNr = seriesDef == null ? 0 : seriesDef.getNumber();
+			if (attrDef == null) {
+				// delete attribute definition
+				m.deleteSchemaComponent(schema, seriesNr, origAttrDef.getNumber());
+			} else {
+				String description = null;
+				if (seriesNr != 0) {
+					if (attrDef.getNumber() == DatabaseBackend.MAGIC_NAME_NR)
+						description = seriesDef.getDescription();
+				}
+				if (origAttrDef == null) {
+					// create attribute definition
+					m.createSchemaComponent(schema, seriesNr, description, attrDef);
+				} else {
+					// update attribute definition
+					m.updateSchemaComponent(schema, seriesNr, description, attrDef);
+				}
+			}
+		}
+	}
+	
+	private UpdatableSchemaVisitor visitor;
+	
 	public WriteMethodsForSchema() {
+		visitor = new Visitor(this);
 	}
 	
 	private PreparedStatement create_schema;
@@ -58,13 +119,13 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	 * Throw an exception if the operation cannot be done.
 	 * 
 	 * @param schema a schema
-	 * @param base a base schema or null
 	 * @throws T2DBException
 	 */
-	public void createSchema(UpdatableSchemaImpl schema, Schema base) throws T2DBException {
+	public void createSchema(UpdatableSchema schema) throws T2DBException {
 		Surrogate surrogate = null;
 		Throwable cause = null;
 		try {
+			Schema base = schema.getBase();
 			check(Permission.CREATE, schema);
 			if (base != null)
 				check(Permission.READ, base);
@@ -72,6 +133,8 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			create_schema.setInt(1, getIdOrZero(base));
 			create_schema.setString(2, schema.getName());
 			surrogate = makeSurrogate(schema, executeAndGetNewId(create_schema));
+			schema.getSurrogate().upgrade(surrogate); 
+			updateSchemaComponents(schema);
 		} catch (Exception e) {
 			cause = e;
 		} finally {
@@ -79,7 +142,6 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 		}
 		if (surrogate == null || cause != null)
 			throw T2DBJMsg.exception(cause, J.J30122, schema.getName());
-		schema.getSurrogate().upgrade(surrogate); 
 	}
 	
 	private PreparedStatement delete_schema;
@@ -88,18 +150,16 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	private static final String DELETE_SCHEMA_COMPONENTS = "delete from " + DB.SCHEMA_ITEM + " where id = ?";
 	/**
 	 * Delete a schema from the database.
-	 * Throw an exception if the operation cannot be done.
+	 * Throw an exception if the operation fails.
 	 * 
 	 * @param schema a schema
-	 * @param policy a schema udpdating policy
 	 * @throws T2DBException
 	 */
-	public void deleteSchema(UpdatableSchemaImpl schema, SchemaUpdatePolicy policy) throws T2DBException {
+	public void deleteSchema(UpdatableSchema schema) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
 			check(Permission.MODIFY, schema);
-			policy.willDelete(schema);
 			delete_schema_components = open(DELETE_SCHEMA_COMPONENTS, schema, delete_schema_components);
 			int id = getId(schema);
 			delete_schema_components.setInt(1, id);
@@ -132,7 +192,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	 * @param def an attribute definition
 	 * @throws T2DBException
 	 */
-	public void createSchemaComponent(UpdatableSchema schema, int seriesNr, String description, AttributeDefinition<?> def) throws T2DBException {
+	private void createSchemaComponent(UpdatableSchema schema, int seriesNr, String description, AttributeDefinition<?> def) throws T2DBException {
 		boolean done = false;
 		try {
 			check(Permission.MODIFY, schema);
@@ -171,16 +231,14 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	private static final String UPDATE_SCHEMA = 
 		"update " + DB.SCHEMA_NAME + " set label = ?, parent = ? where id = ?";
 	/**
-	 * Update the basic schema setup in the database.
+	 * Update the schema in the database.
 	 * Throw an exception if the operation cannot be done.
 	 * 
 	 * @param schema a schema
-	 * @param base a base schema
-	 * @param name a string
 	 * @return true if the schema was updated
 	 * @throws T2DBException
 	 */
-	public boolean updateSchema(UpdatableSchema schema, UpdatableSchema base, String name) throws T2DBException {
+	public boolean updateSchema(UpdatableSchema schema) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		RawSchema rawSchema = getRawSchema(schema.getSurrogate());
@@ -188,12 +246,12 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 		boolean baseEdited = baseEdited(schema, rawSchema);
 		if (nameEdited || baseEdited) {
 			try {
+				Schema base = schema.getBase();
 				check(Permission.MODIFY, schema);
-				UpdatableSchema previousBase = ((UpdatableSchemaImpl) schema).getPreviousBase();
-				if (schema.getBase() != null && !schema.getBase().equals(previousBase))
-					check(Permission.READ, schema.getBase());
+				if (baseEdited && base != null)
+					check(Permission.READ, base);
 				update_schema = open(UPDATE_SCHEMA, schema, update_schema);
-				update_schema.setString(1, name);
+				update_schema.setString(1, schema.getName());
 				update_schema.setInt(2, getIdOrZero(base));
 				update_schema.setInt(3, getId(schema));
 				update_schema.execute();
@@ -203,10 +261,19 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			} finally {
 				update_schema = close(update_schema);
 			}
-			if (!done || cause != null)
-				throw T2DBJMsg.exception(cause, J.J30126, schema);
 		}
+		try {
+			done |= updateSchemaComponents(schema);
+		} catch (Exception e) {
+			cause = e;
+		} 
+		if (!done || cause != null)
+			throw T2DBJMsg.exception(cause, J.J30126, schema);
 		return done;
+	}
+	
+	private boolean updateSchemaComponents(UpdatableSchema schema) throws T2DBException {
+		return ((UpdatableSchemaImpl) schema).visit(visitor) > 0;
 	}
 	
 	private PreparedStatement delete_schema_by_attribute;
@@ -221,7 +288,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	 * @param attribNr an attribute number
 	 * @throws T2DBException
 	 */
-	public void deleteSchemaComponent(UpdatableSchema schema, int seriesNr, int attribNr) throws T2DBException {
+	private void deleteSchemaComponent(UpdatableSchema schema, int seriesNr, int attribNr) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
@@ -253,7 +320,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	 * @param seriesNr a series number
 	 * @throws T2DBException
 	 */
-	public void deleteSchemaComponents(UpdatableSchema schema, int seriesNr) throws T2DBException {
+	private void deleteSchemaComponents(UpdatableSchema schema, int seriesNr) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
@@ -286,7 +353,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	 * @param def an attribute definition
 	 * @throws T2DBException
 	 */
-	public void updateSchemaComponent(UpdatableSchema schema, int seriesNr, String description, AttributeDefinition<?> def) throws T2DBException {
+	private void updateSchemaComponent(UpdatableSchema schema, int seriesNr, String description, AttributeDefinition<?> def) throws T2DBException {
 		boolean done = false;
 		Throwable cause = null;
 		try {
@@ -322,36 +389,29 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	}
 	
 	private PreparedStatement find_entity_with_schema;
-	private static final String FIND_ENTITY_WITH_SCHEMA = "select id from " + DB.CHRONICLE + " where schema_id != 0";
+	private static final String FIND_ENTITY_WITH_SCHEMA = "select id from " + DB.CHRONICLE + " where schema_id = ?";
 	/**
-	 * Find all chronicles referencing one of the schemas. 
+	 * Find all chronicles referencing the schema. 
 	 * This looks like a "reading" method but is used in the context of schema updating.
 	 * 
-	 * @param schemas a collection of schemas
+	 * @param schema a schema
 	 * @return a collection of chronicle surrogates
 	 * @throws T2DBException
 	 */
-	public Collection<Surrogate> findChronicles(Collection<UpdatableSchema> schemas) throws T2DBException {
+	public Collection<Surrogate> findChronicles(Schema schema) throws T2DBException {
 		Collection<Surrogate> result = new ArrayList<Surrogate>();
-		if (schemas.size() > 0) {
-			Set<Integer> schemaIds = new HashSet<Integer>(schemas.size());
-			for (UpdatableSchema s : schemas) {
-				schemaIds.add(getId(s));
+		Database database = schema.getSurrogate().getDatabase();
+		try {
+			find_entity_with_schema = open(FIND_ENTITY_WITH_SCHEMA, database, find_entity_with_schema);
+			find_entity_with_schema.setInt(1, getId(schema));
+			ResultSet rs = find_entity_with_schema.executeQuery();
+			while (rs.next()) {
+				result.add(makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1)));
 			}
-			Database database = schemas.iterator().next().getSurrogate().getDatabase();
-			try {
-				find_entity_with_schema = open(FIND_ENTITY_WITH_SCHEMA, database, find_entity_with_schema);
-				ResultSet rs = find_entity_with_schema.executeQuery();
-				while (rs.next()) {
-					if (schemaIds.contains(rs.getInt(1))) {
-						result.add(makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1)));
-					}
-				}
-			} catch (Exception e) {
-				throw T2DBJMsg.exception(e, J.J30117);
-			} finally {
-				find_entity_with_schema = close(find_entity_with_schema);
-			}
+		} catch (Exception e) {
+			throw T2DBJMsg.exception(e, J.J30117);
+		} finally {
+			find_entity_with_schema = close(find_entity_with_schema);
 		}
 		return result;
 	}
@@ -359,33 +419,26 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	private PreparedStatement find_entity_with_property;
 	private static final String FIND_ENTITY_WITH_PROPERTY = "select chronicle from " + DB.ATTRIBUTE_VALUE + " where prop = ?";
 	/**
-	 * Find all chronicles with an explicit attribute value for a given property and schemas. 
+	 * Find all chronicles with an explicit attribute value for a given property and schema. 
 	 * This looks like a "reading" method but is used in the context of schema updating.
 	 * 
 	 * @param property a property
-	 * @param schemas a collection of schemas
+	 * @param schema a schema
 	 * @return a collection of chronicle surrogates
 	 * @throws T2DBException
 	 */
-	public Collection<Surrogate> findChronicles(Property<?> property, Collection<UpdatableSchema> schemas) throws T2DBException {
+	public Collection<Surrogate> findChronicles(Property<?> property, Schema schema) throws T2DBException {
 		Collection<Surrogate> result = new ArrayList<Surrogate>();
 		Database database = property.getSurrogate().getDatabase();
-		// expensive
-		Set<Integer> schemaIds = new HashSet<Integer>(schemas.size());
-		for(UpdatableSchema s : schemas) {
-			schemaIds.add(getId(s));
-		}
 		try {
 			find_entity_with_property = open(FIND_ENTITY_WITH_PROPERTY, property, find_entity_with_property);
 			find_entity_with_property.setInt(1, getId(property));
 			ResultSet rs = find_entity_with_property.executeQuery();
 			while(rs.next()) {
-				if (schemaIds.contains(rs.getInt(1))) {
-					Surrogate entityKey = makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1));
-					Schema schema = database.getChronicle(entityKey).getSchema(true); // hope caching is on
-					if (schemaIds.contains(getId(schema)))
-						result.add(entityKey);
-				}
+				Surrogate entityKey = makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1));
+				Schema s = database.getChronicle(entityKey).getSchema(true);
+				if (s.dependsOnSchema(schema))
+					result.add(entityKey);
 			}
 		} catch (Exception e) {
 			throw T2DBJMsg.exception(e, J.J30117);
@@ -398,42 +451,33 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	private PreparedStatement find_entity_with_series;
 	private static final String FIND_ENTITY_WITH_SERIES = "select chronicle from " + DB.SERIES + " where ssn = ?";
 	/**
-	 * Find all chronicles with actual series in a collection of schemas.
+	 * Find all chronicles with actual series depending from a given schema.
 	 * This looks like a "reading" method but is used in the context of schema updating.
 	 * 
 	 * @param ss a series definition
-	 * @param schemas a collection of schemas
+	 * @param schemas a schema
 	 * @return a collection of chronicle surrogates
 	 * @throws T2DBException
 	 */
-	public Collection<Surrogate> findChronicles(SeriesDefinition ss, Collection<UpdatableSchema> schemas) throws T2DBException {
+	public Collection<Surrogate> findChronicles(SeriesDefinition ss, Schema schema) throws T2DBException {
 		Collection<Surrogate> result = new ArrayList<Surrogate>();
-		if (schemas.size() > 0) {
-			// expensive method
-			Set<Integer> schemaIds = new HashSet<Integer>(schemas.size());
-			for (UpdatableSchema s : schemas) {
-				schemaIds.add(getId(s));
+		Database database = schema.getSurrogate().getDatabase();
+		try {
+			find_entity_with_series = open(FIND_ENTITY_WITH_SERIES, database, find_entity_with_series);
+			find_entity_with_series.setInt(1, ss.getNumber());
+			ResultSet rs = find_entity_with_series.executeQuery();
+			while (rs.next()) {
+				Surrogate entityKey = makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1));
+				Schema s = database.getChronicle(entityKey).getSchema(true);
+				if (s.dependsOnSchema(schema))
+					result.add(entityKey);
 			}
-			Database database = schemas.iterator().next().getSurrogate().getDatabase();
-			try {
-				find_entity_with_series = open(FIND_ENTITY_WITH_SERIES, database, find_entity_with_series);
-				find_entity_with_series.setInt(1, ss.getNumber());
-				ResultSet rs = find_entity_with_series.executeQuery();
-				while (rs.next()) {
-					if (schemaIds.contains(rs.getInt(1))) {
-						Surrogate entityKey = makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1));
-						Schema schema = database.getChronicle(entityKey).getSchema(true); // hope caching is on
-						if (schemaIds.contains(getId(schema)))
-							result.add(entityKey);
-					}
-				}
-			} catch (Exception e) {
-				throw T2DBJMsg.exception(e, J.J30117);
-			} finally {
-				find_entity_with_series = close(find_entity_with_series);
-			}
+		} catch (Exception e) {
+			throw T2DBJMsg.exception(e, J.J30117);
+		} finally {
+			find_entity_with_series = close(find_entity_with_series);
 		}
 		return result;
-	}	
-	
+	}
+
 }

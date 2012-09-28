@@ -23,7 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -310,30 +310,41 @@ public class ReadMethodsForSchema extends JDBCDatabaseMethods {
 		return schemas;
 	}
 
+	/**
+	 * Make an UpdatableSchema from a RawSchema.
+	 * @param database
+	 * @param rawSchema
+	 * @param forceNullBase to break a cycle
+	 * @param cycleDetector
+	 * @return
+	 * @throws T2DBException
+	 */
 	private UpdatableSchema getSchema(Database database, RawSchema rawSchema, Set<Integer> cycleDetector) throws T2DBException {
+		
+		UpdatableSchema schema = null;
 		if (cycleDetector == null)
-			cycleDetector = new LinkedHashSet<Integer>();
-		if (cycleDetector.contains(rawSchema.getId()))
-			throw T2DBJMsg.exception(J.J30115, rawSchema.getId(), cycleDetector.toString());
-		cycleDetector.add(rawSchema.getId());
-		UpdatableSchemaImpl schema = null;
+			cycleDetector = new HashSet<Integer>();
+
+		boolean cycleDetected = !cycleDetector.add(rawSchema.getId());
+		
 		String name = rawSchema.getName();
 		UpdatableSchema base = null;
-		if (rawSchema.getParent() > 0) {
+		if (rawSchema.getParent() > 0 && !cycleDetected) {
 			Surrogate parentKey = makeSurrogate(database, DBObjectType.SCHEMA, rawSchema.getParent());
-			RawSchema brs = getRawSchema(parentKey);
-			if (brs == null)
+			RawSchema rawBaseSchema = getRawSchema(parentKey);
+			if (rawBaseSchema == null)
 				throw T2DBJMsg.exception(J.J30116, rawSchema.getParent(), name);
-			base = getSchema(database, brs, cycleDetector);
+			base = getSchema(database, rawBaseSchema, cycleDetector);
 		}
 		Surrogate surrogate = makeSurrogate(database, DBObjectType.SCHEMA, rawSchema.getId());
-		RawSchemaComponents rscs = getRawSchemaComponents(surrogate);
-		if (rscs != null) {
-			Collection<AttributeDefinition<?>> attributeDefs = makeAttributeDefinitions(database, rscs.attributes);
-			Collection<SeriesDefinition> seriesDefinitions = makeSeriesSchemas(database, rscs.series);
-			schema = new UpdatableSchemaImpl(name, base, attributeDefs, seriesDefinitions, surrogate);
-		} else
-			schema = new UpdatableSchemaImpl(name, base, null, null, surrogate);
+		RawSchemaComponents rawComponents = getRawSchemaComponents(surrogate);
+		Collection<AttributeDefinition<?>> attributeDefs = null;
+		Collection<SeriesDefinition> seriesDefinitions = null;
+		if (rawComponents != null) {
+			attributeDefs = makeAttributeDefinitions(database, rawComponents.attributes);
+			seriesDefinitions = makeSeriesSchemas(database, rawComponents.series);
+		}
+		schema = new UpdatableSchemaImpl(name, base, attributeDefs, seriesDefinitions, surrogate);
 		return schema;
 	}
 
