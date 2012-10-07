@@ -383,13 +383,16 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 	 * @throws T2DBException
 	 */
 	public <T>Series<T>[] getSeries(Chronicle chronicle, String[] names, int[] numbers) throws T2DBException {
-		if (names.length == 0 || names.length != numbers.length)
+		if (names.length != numbers.length)
 			throw new IllegalArgumentException("names and numbers emtpy or unequally sized arrays");
 		@SuppressWarnings("unchecked")
 		Series<T>[] result = new SeriesImpl[numbers.length];
 		int entityId = getId(chronicle);
 		try {
-			if (numbers.length == 1) {
+			switch(numbers.length) {
+			case 0:
+				break;
+			case 1:
 				select_series_by_entity_and_nr = open(SELECT_SERIES_BY_ENTITY_AND_NR, chronicle, select_series_by_entity_and_nr);
 				select_series_by_entity_and_nr.setInt(1, entityId);
 				select_series_by_entity_and_nr.setInt(2, numbers[0]);
@@ -399,10 +402,11 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 							makeSurrogate(chronicle.getSurrogate().getDatabase(), DBObjectType.SERIES, rs.getInt(1)));
 				}
 				// else	result[0] = null;
-			} else {
+				break;
+			default:
 				select_series_by_entity = open(SELECT_SERIES_BY_ENTITY, chronicle, select_series_by_entity);
 				select_series_by_entity.setInt(1, entityId);
-				ResultSet rs = select_series_by_entity.executeQuery();
+				rs = select_series_by_entity.executeQuery();
 				Map<Integer, Integer> index = new HashMap<Integer, Integer>(numbers.length);
 				for (int i = 0; i < numbers.length; i++) {
 					index.put(numbers[i], i);
@@ -414,6 +418,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 								makeSurrogate(chronicle.getSurrogate().getDatabase(), DBObjectType.SERIES, rs.getInt(1)));
 				}
 				rs.close();
+				break;
 			}
 		} catch (SQLException e) {
 			throw T2DBJMsg.exception(e, J.J40121, chronicle.getName(true));

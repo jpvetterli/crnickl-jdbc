@@ -64,7 +64,8 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 				m.deleteSchemaComponents(schema, original.getNumber());
 			} else {
 				if (def.isErasing()) {
-					AttributeDefinitionImpl<String> attribDef = new AttributeDefinitionImpl<String>(
+					AttributeDefinitionImpl<String> attribDef = 
+							new AttributeDefinitionImpl<String>(def.getNumber(), 
 							DatabaseBackend.MAGIC_NAME_NR, null, null);
 					attribDef.edit();
 					attribDef.setErasing(true);
@@ -125,14 +126,15 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 		Surrogate surrogate = null;
 		Throwable cause = null;
 		try {
-			Schema base = schema.getBase();
 			check(Permission.CREATE, schema);
+			Schema base = schema.getBase();
 			if (base != null)
 				check(Permission.READ, base);
 			create_schema = open(CREATE_SCHEMA, schema, create_schema);
 			create_schema.setInt(1, getIdOrZero(base));
 			create_schema.setString(2, schema.getName());
 			surrogate = makeSurrogate(schema, executeAndGetNewId(create_schema));
+			// IMPORTANT: upgrade surrogate before handling the schema's components
 			schema.getSurrogate().upgrade(surrogate); 
 			updateSchemaComponents(schema);
 		} catch (Exception e) {
@@ -275,7 +277,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	}
 	
 	private boolean updateSchemaComponents(UpdatableSchema schema) throws T2DBException {
-		return ((UpdatableSchemaImpl) schema).visit(visitor) > 0;
+		return ((UpdatableSchemaImpl) schema).traverse(false, visitor) > 0;
 	}
 	
 	private PreparedStatement delete_schema_by_attribute;

@@ -73,7 +73,7 @@ public class T040_SeriesTest extends TestCase {
 			
 			// need an entity
 			if (db.getChronicle("bt.test040", false) == null) {
-				UpdatableChronicle ent = db.getTopChronicle().edit().createChronicle("test040", false, "test entity", null, schema);
+				UpdatableChronicle ent = db.getTopChronicle().edit().createChronicle("test040", false, "test entity", null, schema.resolve());
 				ent.applyUpdates();
 			}
 			
@@ -273,7 +273,7 @@ public class T040_SeriesTest extends TestCase {
 			usch.setSeriesName(4, "test4");
 			usch.setSeriesType(4, "number");
 			usch.setSeriesTimeDomain(4, Day.DOMAIN);
-			assertEquals(1, usch.getSeriesDefinitions().size());
+			assertEquals(2, usch.getSeriesDefinitions().size());
 			usch.applyUpdates();
 			assertEquals(2, usch.getSeriesDefinitions().size());
 			db.commit();

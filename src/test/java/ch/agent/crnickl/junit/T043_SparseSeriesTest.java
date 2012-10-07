@@ -78,7 +78,7 @@ public class T043_SparseSeriesTest extends TestCase {
 			
 			// need an entity
 			if (db.getChronicle("bt.test043", false) == null) {
-				UpdatableChronicle ent = db.getTopChronicle().edit().createChronicle("test043", false, "test entity", null, schema);
+				UpdatableChronicle ent = db.getTopChronicle().edit().createChronicle("test043", false, "test entity", null, schema.resolve());
 				ent.applyUpdates();
 			}
 			

@@ -265,13 +265,13 @@ public class ReadMethodsForSchema extends JDBCDatabaseMethods {
 		for (RawSchemaComponent oneAttr : allAttr) {
 			AttributeDefinitionImpl<?> def = null;
 			if (oneAttr.propId < 1) {
-				def = new AttributeDefinitionImpl(oneAttr.attribNr, null, null);
+				def = new AttributeDefinitionImpl(oneAttr.seriesNr, oneAttr.attribNr, null, null);
 				def.edit();
 				def.setErasing(true);
 			} else {
 				Property<?> property = ((JDBCDatabase)database).getReadMethodsForProperty()
 					.getProperty(makeSurrogate(database, DBObjectType.PROPERTY, oneAttr.propId));
-				def = new AttributeDefinitionImpl(oneAttr.attribNr, property, property.getValueType().scan(oneAttr.value));
+				def = new AttributeDefinitionImpl(oneAttr.seriesNr, oneAttr.attribNr, property, property.getValueType().scan(oneAttr.value));
 			}
 			defs.add(def);
 		}

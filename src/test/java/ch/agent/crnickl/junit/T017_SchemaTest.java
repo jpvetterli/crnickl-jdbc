@@ -21,8 +21,6 @@ package ch.agent.crnickl.junit;
 
 import java.util.Collection;
 
-import junit.framework.TestCase;
-import ch.agent.core.KeyedException;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Attribute;
@@ -35,9 +33,11 @@ import ch.agent.crnickl.api.UpdatableProperty;
 import ch.agent.crnickl.api.UpdatableSchema;
 import ch.agent.crnickl.api.UpdatableSeries;
 import ch.agent.crnickl.api.UpdatableValueType;
+import ch.agent.t2.time.DateTime;
+import ch.agent.t2.time.Day;
 import ch.agent.t2.time.Workday;
 
-public class T017_SchemaTest extends TestCase {
+public class T017_SchemaTest extends AbstractTest {
 
 	private Database db;
 	
@@ -57,16 +57,48 @@ public class T017_SchemaTest extends TestCase {
 			UpdatableValueType<String> vt2 = db.createValueType("type2", true, "TEXT");
 			vt2.addValue(vt2.getScanner().scan("t2v2"), "type2 value2");
 			vt2.applyUpdates();
+			UpdatableValueType<String> vt3 = db.createValueType("type3", false, "TEXT");
+			vt3.applyUpdates();
 
 			// create 2 properties
 			db.createProperty("prop1", vt1, false).applyUpdates();
 			db.createProperty("prop2", vt2, false).applyUpdates();
+			db.createProperty("prop3", vt3, false).applyUpdates();
 		} catch (T2DBException e) {
 			fail(e.getMessage());
 		}
 	}
 	
-	public void test11_create_schema() {
+	public void test11A_create_schema() {
+		try {
+			// attempting to add a series with an existing name should fail
+			UpdatableSchema schema = db.createSchema("schema1", null);
+			schema.addSeries(1);
+			schema.setSeriesName(1, "x25");
+			schema.addSeries(2);
+			schema.setSeriesName(2, "x25");
+			expectException();
+		} catch (T2DBException e) {
+			assertException(e, D.D30153);
+		}
+	}
+	
+	public void test11B_create_schema() {
+		try {
+			UpdatableSchema schema = db.createSchema("schema1", null);
+			schema.addSeries(1);
+			schema.setSeriesName(1, "x25");
+
+			schema.addAttribute(1);
+			schema.setAttributeProperty(1, db.getProperty("prop1", true));
+			schema.setAttributeDefault(1, "t1v1");
+			assertEquals("t1v1", schema.getAttributeDefinition(1, true).getValue().toString());
+			assertEquals("t1v1", schema.getAttributeDefinition("prop1", true).getValue().toString());
+		} catch (T2DBException e) {
+			fail(e.getMessage());
+		}
+	}
+	public void test11C_create_schema() {
 		try {
 			UpdatableSchema schema = db.createSchema("schema1", null);
 			schema.addAttribute(1);
@@ -74,9 +106,85 @@ public class T017_SchemaTest extends TestCase {
 			schema.setAttributeDefault(1, "t1v1");
 			schema.setAttributeProperty(1, db.getProperty("prop2", true));
 			schema.applyUpdates();
-			fail("exception expected");
+			expectException();
 		} catch (T2DBException e) {
-			assertEquals(D.D30133, e.getMsg().getKey());
+			assertException(e, D.D30133);
+		}
+	}
+
+	public void test11D_create_schema() {
+		try {
+			// adding an incomplete, non-erasing attribute should fail
+			UpdatableSchema schema = db.createSchema("schema1", null);
+			schema.addAttribute(1);
+			schema.applyUpdates();
+			expectException();
+		} catch (T2DBException e) {
+			assertException(e, D.D30105, D.D30111);
+		}
+	}
+	
+	public void test11E_create_schema() {
+		try {
+			// adding an incomplete, non-erasing series should fail
+			UpdatableSchema schema = db.createSchema("schema1", null);
+			schema.addSeries(1);
+			schema.applyUpdates();
+			expectException();
+		} catch (T2DBException e) {
+			assertException(e, D.D30105, D.D30112);
+		}
+	}
+	
+	public void test11F_create_schema() {
+		try {
+			// adding an incomplete, non-erasing series attribute should fail
+			UpdatableSchema schema = db.createSchema("schema1f", null);
+			schema.addSeries(1);
+			schema.setSeriesName(1, "x");
+			schema.setSeriesType(1, "numeric");
+			schema.setSeriesTimeDomain(1, Day.DOMAIN);
+			schema.applyUpdates();
+		} catch (T2DBException e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public void test11G_update_schema() {
+		try {
+			// adding an incomplete, non-erasing series attribute should fail
+			UpdatableSchema schema = db.getUpdatableSchemas("schema1f").iterator().next();
+			schema.addAttribute(1, 4);
+			schema.applyUpdates();
+			expectException();
+		} catch (T2DBException e) {
+			assertException(e, D.D30105, D.D30113);
+		}
+	}
+	
+	public void test11H_update_schema() {
+		try {
+			// adding an incomplete, non-erasing series attribute should fail
+			UpdatableSchema schema = db.getUpdatableSchemas("schema1f").iterator().next();
+			schema.addAttribute(1, 4);
+			schema.setAttributeProperty(1, 4, db.getProperty("prop2", true));
+			// default value is not set, but null is not okay for prop2
+			schema.applyUpdates();
+			expectException();
+		} catch (T2DBException e) {
+			assertException(e, D.D30105, D.D30113);
+		}
+	}
+	
+	public void test11I_update_schema() {
+		try {
+			UpdatableSchema schema = db.getUpdatableSchemas("schema1f").iterator().next();
+			schema.addAttribute(1, 4);
+			schema.setAttributeProperty(1, 4, db.getProperty("prop2", true));
+			schema.setAttributeDefault(1, 4, "t2v2");
+			schema.applyUpdates();
+		} catch (T2DBException e) {
+			fail(e.getMessage());
 		}
 	}
 
@@ -88,9 +196,9 @@ public class T017_SchemaTest extends TestCase {
 			schema.setAttributeDefault(1, "t1v1");
 			schema.addAttribute(1);
 			schema.applyUpdates();
-			fail("exception expected");
+			expectException();
 		} catch (T2DBException e) {
-			assertEquals(D.D30127, e.getMsg().getKey());
+			assertException(e, D.D30127);
 		}
 	}
 	
@@ -106,9 +214,73 @@ public class T017_SchemaTest extends TestCase {
 			schema.deleteAttribute(1);
 			schema.addAttribute(1);
 			schema.applyUpdates();
-			fail("exception expected");
+			expectException();
 		} catch (Exception e) {
-			assertEquals("D30134",  ((KeyedException)e.getCause()).getMsg().getKey());
+			assertException(e, D.D30105, D.D30111);
+		}
+	}
+	
+	public void test13A_create_schema() {
+		try {
+			UpdatableSchema schema = db.createSchema("schema1", null);
+			schema.addAttribute(1);
+			schema.setAttributeProperty(1, db.getProperty("prop1", true));
+			schema.setAttributeDefault(1, "t1v1");
+			schema.addAttribute(2);
+			schema.setAttributeProperty(2, db.getProperty("prop1", true));
+			schema.setAttributeDefault(2, "t1v1");
+			schema.applyUpdates();
+			schema.resolve();
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D30151, D.D30130);
+		}
+	}
+	
+	public void test13B_create_schema() {
+		try {
+			UpdatableSchema schema = db.createSchema("schema5", null);
+			schema.applyUpdates();
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public void test13C_create_schema() {
+		try {
+			// creating a chronicle with an updatable schema should be impossible
+			UpdatableSchema schema = db.getUpdatableSchemas("schema5").iterator().next();
+			UpdatableChronicle chro = db.getTopChronicle().edit().createChronicle("schema5chro", false, "test chronicle", null, schema);
+			chro.applyUpdates();
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D40104);
+		}
+	}
+	
+	public void test13D_create_schema() {
+		try {
+			// creating a chronicle with an empty schema should be possible
+			Schema schema = db.getSchemas("schema5").iterator().next();
+			UpdatableChronicle chro = db.getTopChronicle().edit().createChronicle("schema5chro", false, "test chronicle", null, schema);
+			chro.applyUpdates();
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public void test13E_delete_chronicle() {
+		try {
+			/*
+			 * There was a bug allowing to create chronicle with incomplete
+			 * schemas (see earlier test). This showed a bug making it
+			 * impossible to delete a chronicle with no series defined.
+			 */
+			deleteChron("bt.schema5chro");
+//			expectException();
+		} catch (Exception e) {
+//			assertException(e, D.D40102);
+			fail(e.getMessage());
 		}
 	}
 
@@ -218,9 +390,9 @@ public class T017_SchemaTest extends TestCase {
 //			schema4.applyUpdates();
 			UpdatableSchema schema1 = db.getSchemas("schema1a").iterator().next().edit();
 			schema1.setBase(schema4);
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D30128",  e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, "D30128");
 		}
 	}
 
@@ -232,9 +404,6 @@ public class T017_SchemaTest extends TestCase {
 			assertEquals("prop1", s.getAttributeDefinition(1, true).getName());
 			schema4.addAttribute(1);
 			schema4.eraseAttribute(1);
-			schema4.applyUpdates();
-			s = schema4.resolve();
-			assertEquals(null, s.getAttributeDefinition(1, false));
 			assertEquals(true, schema4.getAttributeDefinition(1, true).isErasing());
 			assertEquals("fou", s.getSeriesDefinition(1, true).getName());
 			schema4.setAttributeProperty(1, db.getProperty("prop1", true));
@@ -243,9 +412,9 @@ public class T017_SchemaTest extends TestCase {
 			schema1 = db.getSchemas("schema1a").iterator().next().edit();
 			schema1.setBase(schema4);
 			schema1.applyUpdates();
-			fail("exception expected");
+			expectException();
 		} catch (Exception e) {
-			assertEquals("D30110",  ((KeyedException) e.getCause()).getMsg().getKey());
+			assertException(e, null, D.D30110);
 		}
 	}
 	
@@ -256,12 +425,7 @@ public class T017_SchemaTest extends TestCase {
 			assertEquals("fou", s.getSeriesDefinition(1, true).getName());
 			schema4.addSeries(1);
 			schema4.eraseSeries(1);
-			schema4.applyUpdates();
-			s = schema4.resolve();
-			assertEquals(null, s.getSeriesDefinition(1, false));
-			Schema s4 = db.getSchemas("schema4").iterator().next();
-			assertEquals(null, s4.getSeriesDefinition(1, false));
-		} catch (KeyedException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -273,7 +437,7 @@ public class T017_SchemaTest extends TestCase {
 			UpdatableSchema schema3 = db.getUpdatableSchemas("schema3").iterator().next();
 			schema3.setBase(schema2);
 			schema3.applyUpdates();
-		} catch (KeyedException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -285,13 +449,9 @@ public class T017_SchemaTest extends TestCase {
 		try {
 			UpdatableSchema schema4 = db.getUpdatableSchemas("schema4").iterator().next();
 			schema4.deleteSeries(1);
-			schema4.applyUpdates();
-			Schema s = schema4.resolve();
-			assertEquals("fou", s.getSeriesDefinition(1, false).getName());
-			Schema s4 = db.getSchemas("schema4").iterator().next();
-			assertEquals("fou", s4.getSeriesDefinition(1, false).getName());
-		} catch (KeyedException e) {
-			fail(e.getMessage());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D30125);
 		}
 	}
 	
@@ -307,9 +467,80 @@ public class T017_SchemaTest extends TestCase {
 			UpdatableSchema sch1 = schema.edit();
 			sch1.deleteSeries(1);
 			sch1.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D30150",  ((KeyedException) e.getCause()).getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, null, "D30150");
+		}
+	}
+	
+	public void test35DA_edit_schema() {
+		try {
+			Schema schema = db.getSchemas("schema1a").iterator().next();
+			Series<Double> ser = db.getSeries("bt.schema1achro.fou", true);
+			assertEquals(42., ser.getValue(Workday.DOMAIN.time("2011-06-30")));
+			// renaming the series should be okay 
+			UpdatableSchema sch1 = schema.edit();
+			//sch1.setSeriesName(1, "fooo"); next line should be equivalent
+			sch1.setAttributeDefault(1, 1, "fooo");
+			sch1.applyUpdates();
+			ser = db.getSeries("bt.schema1achro.fooo", true);
+			assertEquals(42., ser.getValue(Workday.DOMAIN.time("2011-06-30")));
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public void test35DB_edit_schema() {
+		try {
+			Schema schema = db.getSchemas("schema1a").iterator().next();
+			Series<Double> ser = db.getSeries("bt.schema1achro.fooo", true);
+			assertEquals(42., ser.getValue(Workday.DOMAIN.time("2011-06-30")));
+			// changing the time domain should fail 
+			UpdatableSchema sch1 = schema.edit();
+			sch1.setSeriesTimeDomain(1, DateTime.DOMAIN);
+			sch1.applyUpdates();
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D30105, D.D30149);
+		}
+	}
+	
+	public void test35DC_edit_schema() {
+		try {
+			Schema schema = db.getSchemas("schema1a").iterator().next();
+			Series<Double> ser = db.getSeries("bt.schema1achro.fooo", true);
+			// changing the time domain should fail 
+			UpdatableSchema sch1 = schema.edit();
+			sch1.addAttribute(7);
+			sch1.setAttributeDefault(7, "foo");
+			sch1.setAttributeProperty(7, db.getProperty("prop3", true));
+			sch1.applyUpdates();
+
+			// important: get it again
+			ser = db.getSeries("bt.schema1achro.fooo", true);
+			Attribute<?> sa = ser.getAttribute("prop3", false);
+			assertEquals("foo", sa.get().toString());
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public void test35DD_edit_schema() {
+		try {
+			Schema schema = db.getSchemas("schema1a").iterator().next();
+			UpdatableSchema sch1 = schema.edit();
+			sch1.addAttribute(1, 5);
+			sch1.setAttributeDefault(1, 5, "bar");
+			sch1.setAttributeProperty(1, 5, db.getProperty("prop3", true));
+			sch1.applyUpdates();
+
+			Series<Double> ser = db.getSeries("bt.schema1achro.fooo", true);
+			Attribute<?> sa = ser.getAttribute("prop3", false);
+			assertEquals("bar", sa.get().toString());
+			Attribute<?> ca = ser.getChronicle().getAttribute("prop3", false);
+			assertEquals("foo", ca.get().toString());
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
@@ -318,44 +549,31 @@ public class T017_SchemaTest extends TestCase {
 			Schema schema = db.getSchemas("schema4").iterator().next();
 			UpdatableChronicle chro = db.getTopChronicle().edit().createChronicle("schema4chro", false, "test chronicle", null, schema);
 			chro.applyUpdates();
-			UpdatableSeries<Double> ser = db.getUpdatableSeries("bt.schema4chro.fou", true);
+			UpdatableSeries<Double> ser = db.getUpdatableSeries("bt.schema4chro.fooo", true);
 			ser.applyUpdates();
 			// note that the series is deleted in the base schema 
 			UpdatableSchema sch1 = db.getUpdatableSchemas("schema1a").iterator().next();
 			sch1.deleteSeries(1);
 			sch1.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D30150",  ((KeyedException) e.getCause()).getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, null, D.D30150);
 		}
 	}
 	
-	public void test35F_edit_schema() {
-		try {
-			UpdatableSchema schema4 = db.getUpdatableSchemas("schema4").iterator().next();
-			// note that the series is erased 
-			schema4.addSeries(1);
-			schema4.eraseSeries(1);
-			schema4.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D30150",  ((KeyedException) e.getCause()).getMsg().getKey());
-		}
-	}
-
 	public void test35G_edit_schema() {
 		try {
 			UpdatableSchema schema = db.getUpdatableSchemas("schema1a").iterator().next();
 			schema.deleteAttribute(1);
 			schema.applyUpdates();
-			assertEquals(0, schema.getAttributeDefinitions().size());
+			assertEquals(1, schema.getAttributeDefinitions().size());
 			// put it back we still need it
 			schema.addAttribute(1);
 			schema.setAttributeProperty(1, db.getProperty("prop1", true));
 			schema.setAttributeDefault(1, "t1v1");
 			schema.applyUpdates();
-			assertEquals(1, schema.getAttributeDefinitions().size());
-		} catch (KeyedException e) {
+			assertEquals(2, schema.getAttributeDefinitions().size());
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -375,9 +593,9 @@ public class T017_SchemaTest extends TestCase {
 			assertEquals("t1v2", chro.getAttribute("prop1", true).get().toString());
 			schema.deleteAttribute(1);
 			schema.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D30146",  ((KeyedException) e.getCause()).getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, null, "D30146");
 		}
 	}
 	
@@ -397,42 +615,73 @@ public class T017_SchemaTest extends TestCase {
 			UpdatableSchema schema1 = db.getUpdatableSchemas("schema1a").iterator().next();
 			schema1.deleteAttribute(1);
 			schema1.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D30146",  ((KeyedException) e.getCause()).getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, null, "D30146");
 		}
 	}
+	
 	public void test35J_edit_schema() {
 		try {
 			// erase attribute 
 			Chronicle chro = db.getChronicle("bt.schema3chro", true);
 			assertEquals("t1v3", chro.getAttribute("prop1", true).get().toString());
+			UpdatableSchema schema3 = db.getUpdatableSchemas("schema3").iterator().next();
+			schema3.addAttribute(1);
+			schema3.eraseAttribute(1);
+			schema3.applyUpdates();
+			assertEquals(null, schema3.getAttributeDefinition("prop1", false));
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D30105, D.D30146);
+		}
+	}
+
+	public void test35K_edit_schema() {
+		try {
+			// erase attribute 
+			UpdatableChronicle chro = db.getChronicle("bt.schema3chro", true).edit();
+			assertEquals("t1v3", chro.getAttribute("prop1", true).get().toString());
+			// use the attribute
+			Attribute<?> a = chro.getAttribute("prop1", true);
+			a.reset();
+			chro.setAttribute(a);
+			chro.applyUpdates();
+			assertEquals("t1v2", chro.getAttribute("prop1", true).get().toString());
+
 			
 			UpdatableSchema schema3 = db.getUpdatableSchemas("schema3").iterator().next();
 			schema3.addAttribute(1);
 			schema3.eraseAttribute(1);
 			schema3.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D30146",  ((KeyedException) e.getCause()).getMsg().getKey());
+			assertEquals(null, schema3.getAttributeDefinition("prop1", false));
+			expectException();
+		} catch (Exception e) {
+			assertException(e, null, D.D30146);
 		}
 	}
-
+	
 	public void test36_delete_schema() {
 		try {
 			UpdatableSchema schema1 = db.getSchemas("schema1a").iterator().next().edit();
 			schema1.destroy();
 			schema1.applyUpdates();
-			fail("exception expected");
+			expectException();
 		} catch (Exception e) {
-			assertEquals(D.D30140, ((KeyedException)e).getMsg().getKey());
+			assertException(e, D.D30140);
 		}
 	}
 	
-	public void test37_delete_schema() {
+	public void test37A_delete_chronicles() {
 		try {
 			deleteChron("bt.schema1achro", "bt.schema4chro", "bt.schema3chro");
-
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public void test37B_delete_schemas() {
+		try {
 			int count = 1;
 			Collection<UpdatableSchema> schemas = null;
 			boolean retry = true;
@@ -459,8 +708,8 @@ public class T017_SchemaTest extends TestCase {
 	
 	public void test99_cleanup() {
 		try {
-			deleteProp("prop1", "prop2");
-			deleteVT("type1", "type2");
+			deleteProp("prop1", "prop2", "prop3");
+			deleteVT("type1", "type2", "type3");
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
