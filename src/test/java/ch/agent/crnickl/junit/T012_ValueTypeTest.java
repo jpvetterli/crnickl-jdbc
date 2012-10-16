@@ -21,14 +21,21 @@ package ch.agent.crnickl.junit;
 
 import java.util.Collection;
 
-import junit.framework.TestCase;
-import ch.agent.core.KeyedException;
+import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.UpdatableValueType;
+import ch.agent.crnickl.api.ValueScanner;
 import ch.agent.crnickl.api.ValueType;
+import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
-public class T012_ValueTypeTest extends TestCase {
+/**
+ * These tests must be executed together. They build upon each other. 
+ * The sequence is important. The last tests cleanup.
+ */
+public class T012_ValueTypeTest extends AbstractTest {
 
 	private Database db;
 	
@@ -37,7 +44,7 @@ public class T012_ValueTypeTest extends TestCase {
 		db = DBSetUp.getDatabase();
 	}
 
-	public void test002_create_type() {
+	public void test_create_type() {
 		try {
 			UpdatableValueType<String> vt = db.createValueType("foo-type", true, "TEXT");
 			vt.addValue(vt.getScanner().scan("bar"), "it's bar");
@@ -46,12 +53,11 @@ public class T012_ValueTypeTest extends TestCase {
 			assertEquals("foo-type", db.getValueType(vt.getSurrogate()).getName());
 			assertEquals("it's bar", db.getValueType(vt.getSurrogate()).getValueDescriptions().get("bar"));
 		} catch (Exception e) {
-//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
 	
-	public void test003_create_type() {
+	public void test_create_another_type() {
 		try {
 			UpdatableValueType<String> vt = db.createValueType("bar-type", false, "TEXT");
 			vt.applyUpdates();
@@ -63,7 +69,7 @@ public class T012_ValueTypeTest extends TestCase {
 		}
 	}
 	
-	public void test004_update_type() {
+	public void test_rename_type() {
 		try {
 			ValueType<String> vt = db.getValueType("foo-type");
 			Surrogate s = vt.getSurrogate();
@@ -76,45 +82,50 @@ public class T012_ValueTypeTest extends TestCase {
 		}
 	}
 
-	private void helper_delete_type(String name) {
+	private void helper_delete_type(String name) throws Exception {
+		ValueType<String> vt = db.getValueType(name);
+		UpdatableValueType<String> uvt = vt.edit();
+		uvt.destroy();
+		uvt.applyUpdates();
 		try {
-			ValueType<String> vt = db.getValueType(name);
-			UpdatableValueType<String> uvt = vt.edit();
-			uvt.destroy();
-			uvt.applyUpdates();
 			db.getValueType(name);
-			fail("exception expected");
-		} catch (KeyedException e) {
-//			e.printStackTrace();
-			assertEquals("J10109", e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, J.J10109);
 		}
 	}
 	
-	public void test006_delete_type() {
+	public void test_delete_types_by_pattern() {
 		try {
 			Collection<ValueType<?>> vts = db.getValueTypes("*-type");
 			for (ValueType<?> vt : vts) {
 				helper_delete_type(vt.getName());
 			}
-			helper_delete_type("foo");
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
 	
-	public void test010_create_type() {
+	public void test_delete_non_existing_type() {
+		try {
+			helper_delete_type("foo");
+			expectException();
+		} catch (Exception e) {
+			assertException(e, J.J10109);
+		}
+	}
+	
+	public void test_recreate_type() {
 		try {
 			UpdatableValueType<String> vt = db.createValueType("foo", true, "TEXT");
-//			vt.addValue(vt.getScanner().scan("foo1"), "Foo 1");
 			vt.applyUpdates();
 			assertEquals(0, vt.getValues().size());
 		} catch (Exception e) {
-//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
 
-	public void test011_update_type_add_value() {
+	public void test_type_add_value() {
 		try {
 			UpdatableValueType<String> vt = 
 					db.getValueType("foo").typeCheck(String.class).edit();
@@ -126,7 +137,7 @@ public class T012_ValueTypeTest extends TestCase {
 		}
 	}
 	
-	public void test012_update_type_add_more_values() {
+	public void test_add_more_values() {
 		try {
 			UpdatableValueType<String> vt = 
 					db.getValueType("foo").typeCheck(String.class).edit();
@@ -134,103 +145,174 @@ public class T012_ValueTypeTest extends TestCase {
 			vt.addValue(vt.getScanner().scan("foo4"), "Foo 4");
 			vt.applyUpdates();
 			assertEquals(3, vt.getValues().size());
-		} catch (KeyedException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
 	
-	public void test013_update_type_no_update() {
+	public void test_get_value_and_description() {
+		try {
+			ValueType<String> vt = db.getValueType("foo");
+			Collection<String> values = vt.getValues(null);
+			assertEquals("foo1 - Foo 1", values.iterator().next());
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+
+	public void test_get_all_values() {
+		try {
+			ValueType<String> vt = db.getValueType("foo").typeCheck(String.class).edit();
+			assertTrue(vt.getValueDescriptions().get("foo1").equals("Foo 1"));
+			assertTrue(vt.getValueDescriptions().get("baz") == null);
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public void test_update_type_no_update() {
 		try {
 			UpdatableValueType<String> vt = 
 					db.getValueType("foo").typeCheck(String.class).edit();
 			vt.applyUpdates();
-		} catch (KeyedException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
 	
-	public void test015_update_type_edit_existing() {
+	public void test_update_existing_value() {
 		try {
 			UpdatableValueType<String> vt = 
 					db.getValueType("foo").typeCheck(String.class).edit();
 			vt.updateValue(vt.getScanner().scan("foo1"), "Foo 1 edited");
 			vt.applyUpdates();
 			assertEquals("Foo 1 edited", vt.getValueDescriptions().get("foo1"));
-		} catch (KeyedException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
 	
-	public void test016_update_type_edit_non_existing() {
+	public void test_update_non_existing_value() {
 		try {
 			UpdatableValueType<String> vt = 
 					db.getValueType("foo").typeCheck(String.class).edit();
 			vt.updateValue(vt.getScanner().scan("foo3"), "Foo 3");
 			vt.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-//			e.printStackTrace();
-			assertEquals("D10123", e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D10123);
 		}
 	}
 	
-	public void test017_update_type_delete_non_existing_value() {
+	public void test_delete_non_existing_value() {
 		try {
 			UpdatableValueType<String> vt = 
 					db.getValueType("foo").typeCheck(String.class).edit();
 			vt.deleteValue(vt.getScanner().scan("foo3"));
 			vt.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-//			e.printStackTrace();
-			assertEquals("D10122", e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D10122);
 		}
 	}
 	
-	public void test018_update_type_delete_existing_value() {
+	public void test_delete_existing_value() {
 		try {
 			UpdatableValueType<String> vt = 
 					db.getValueType("foo").typeCheck(String.class).edit();
 			vt.deleteValue(vt.getScanner().scan("foo4"));
 			vt.applyUpdates();
 			assertEquals(2, vt.getValues().size());
-		} catch (KeyedException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
 
-//	public void test013_value_type() {
-//		try {
-//			ValueType<String> vt = db.getValueType("foo type");
-//			Collection<String> values = vt.getValues(null);
-//			assertEquals("bar - it's bar", values.iterator().next());
-//		} catch (Exception e) {
-//			fail(e.getMessage());
-//		}
-//	}
-//	
-//	public void test016_add_value_but_should_not() {
-//		try {
-//			UpdatableValueType<String> vt = db.getValueType("foo type").typeCheck(String.class).edit();
-//			vt.updateValue(vt.getScanner().scan("baz"), "BAZ");
-//			vt.applyUpdates();
-//			fail("exception expected");
-//		} catch (T2DBException e) {
-//			assertEquals(D.D10123, e.getMsg().getKey());
-//		}
-//	}
-//	
-//	public void test020_add_value_and_delete_it() {
-//		try {
-//			UpdatableValueType<String> vt = db.getValueType("foo type").typeCheck(String.class).edit();
-//			vt.addValue(vt.getScanner().scan("baz"), "BAZ");
-//			vt.addValue(vt.getScanner().scan("barf"), "BARF");
-//			vt.applyUpdates();
-//			vt.deleteValue(vt.getScanner().scan("baz"));
-//			vt.applyUpdates();
-//			assertTrue(vt.getValueDescriptions().get("baz")== null);
-//		} catch (T2DBException e) {
-//			fail(e.toString());
-//		}
-//	}
+	public void test_delete_existing_type() {
+		try {
+			helper_delete_type("foo");
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public static class Foo {
+		private String foo1;
+		private int foo2;
+		
+		public Foo(String foo1, int foo2) {
+			this.foo1 = foo1;
+			this.foo2 = foo2;
+		}
+
+		public String getFoo1() {
+			return foo1;
+		}
+
+		public int getFoo2() {
+			return foo2;
+		}
+
+		@Override
+		public String toString() {
+			return foo1 + ":" + foo2;
+		}
+		
+	}
+	
+	public static class FooScanner implements ValueScanner<Foo> {
+
+		@Override
+		public Class<Foo> getType() {
+			return Foo.class;
+		}
+
+		@Override
+		public Foo scan(String value) throws T2DBException {
+			try {
+				String[] parts = value.split(":");
+				if (parts.length == 2)
+					return new Foo(parts[0], Integer.valueOf(parts[1]));
+			} catch(Exception e) {
+				throw T2DBMsg.exception(e, "not a Foo: " + value);
+			}
+			throw T2DBMsg.exception("not a Foo: " + value);
+		}
+
+		@Override
+		public void check(Foo value) throws T2DBException {
+		}
+
+		@Override
+		public String toString(Foo value) throws T2DBException {
+			return value.toString();
+		}
+		
+	}
+
+	public void test_create_custom_type() {
+		try {
+			UpdatableValueType<Foo> vt = db.createValueType("foo", true, FooScanner.class.getName());
+			vt.addValue(vt.getScanner().scan("bar:1"), "it's bar:1");
+			try {
+				vt.addValue(vt.getScanner().scan("baz"), "it's baz:2");
+				expectException();
+			} catch (T2DBException e) {
+				assertTrue(e.getMessage().startsWith("not a Foo"));
+			}
+			vt.applyUpdates();
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	public void test_delete_custom_type() {
+		try {
+			UpdatableValueType<Foo> vt = db.getValueType("foo").typeCheck(Foo.class).edit();
+			vt.destroy();
+			vt.applyUpdates();
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
 }

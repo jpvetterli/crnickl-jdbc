@@ -21,15 +21,19 @@ package ch.agent.crnickl.junit;
 
 import java.util.Collection;
 
-import junit.framework.TestCase;
-import ch.agent.core.KeyedException;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.UpdatableProperty;
 import ch.agent.crnickl.api.UpdatableValueType;
 import ch.agent.crnickl.api.ValueType;
+import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
-public class T013_PropertyTest extends TestCase {
+/**
+ * These tests must be executed together. They build upon each other. 
+ * The sequence is important. The last tests cleanup.
+ */
+public class T013_PropertyTest extends AbstractTest {
 
 	private Database db;
 	private static boolean DUMP = false;
@@ -39,7 +43,7 @@ public class T013_PropertyTest extends TestCase {
 		db = DBSetUp.getDatabase();
 	}
 
-	public void test02_create_type() {
+	public void test_create_type() {
 		try {
 			UpdatableValueType<String> vt = db.createValueType("foo type", true, "TEXT");
 			vt.addValue(vt.getScanner().scan("bar"), "it's bar");
@@ -52,7 +56,7 @@ public class T013_PropertyTest extends TestCase {
 		}
 	}
 	
-	public void test03_create_type() {
+	public void test_create_another_type() {
 		try {
 			UpdatableValueType<String> vt = db.createValueType("bar type", true, "TEXT");
 			vt.addValue(vt.getScanner().scan("foo"), "it's foo");
@@ -65,7 +69,7 @@ public class T013_PropertyTest extends TestCase {
 		}
 	}
 	
-	public void test08_create_property() {
+	public void test_create_property() {
 		try {
 			ValueType<String> type = db.getValueType("foo type");
 			UpdatableProperty<String> p = db.createProperty("foo property", type, true);
@@ -76,7 +80,7 @@ public class T013_PropertyTest extends TestCase {
 		}
 	}
 	
-	public void test09_create_property() {
+	public void test_create_another_property() {
 		try {
 			ValueType<String> type = db.getValueType("bar type");
 			UpdatableProperty<String> p = db.createProperty("bar property", type, true);
@@ -87,28 +91,37 @@ public class T013_PropertyTest extends TestCase {
 		}
 	}
 	
-	public void test10_create_property() {
+	public void test_cannot_create_existing_property() {
 		try {
 			ValueType<String> type = db.getValueType("bar type");
 			UpdatableProperty<String> p = db.createProperty("bar property", type, true);
 			p.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("J20114", e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, J.J20114);
 		}
 	}
 	
-	public void test12_use_property_bad_value() {
+	public void test_property_detects_bad_value() {
 		try {
 			UpdatableProperty<String> p = db.getProperty("foo property", true).typeCheck(String.class).edit();
 			p.scan("baz");
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D20110", e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D20110);
 		}
 	}
 	
-	public void test13_get_properties_by_pattern() {
+	public void test_property_accepts_good_value() {
+		try {
+			UpdatableProperty<String> p = db.getProperty("foo property", true).typeCheck(String.class).edit();
+			p.scan("baf");
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+
+	public void test_get_properties_by_pattern() {
 		try {
 			Collection<Property<?>> props = db.getProperties("*prop*");
 			if (DUMP) {
@@ -129,41 +142,31 @@ public class T013_PropertyTest extends TestCase {
 		}
 	}
 	
-	public void test14_use_property_good_value() {
-		try {
-			UpdatableProperty<String> p = db.getProperty("foo property", true).typeCheck(String.class).edit();
-			p.scan("baf");
-		} catch (KeyedException e) {
-			fail(e.getMessage());
-		}
-	}
-
-	public void test18_update_property() {
+	public void test_rename_property() {
 		try {
 			UpdatableProperty<String> p = db.getProperty("foo property", true).typeCheck(String.class).edit();
 			p.setName("moo property");
 			p.applyUpdates();
 			assertEquals("moo property", db.getProperty("moo property", true).getName());
 			db.getProperty("foo property", true);
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("D20109", e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D20109);
 		}
 	}
 	
-	public void test20_delete_value_type_in_use() {
+	public void test_cannot_delete_value_type_in_use() {
 		try {
 			UpdatableValueType<String> type = db.getValueType("foo type").typeCheck(String.class).edit();
 			type.destroy();
 			type.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("J10115", e.getMsg().getKey());
-			assertEquals("J10119", ((KeyedException)e.getCause()).getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, J.J10115, J.J10119);
 		}
 	}
 	
-	public void test24_delete_property_and_type() {
+	public void test_delete_property_and_type() {
 		try {
 			UpdatableProperty<String> p = db.getProperty("moo property", true).typeCheck(String.class).edit();
 			UpdatableValueType<String> vt = p.getValueType().edit();
@@ -173,12 +176,12 @@ public class T013_PropertyTest extends TestCase {
 				fail("foo property found");
 			vt.destroy();
 			vt.applyUpdates();
-		} catch (KeyedException e) {
-			assertEquals("D20109", e.getMsg().getKey());
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 	
-	public void test25_delete_property_and_type() {
+	public void test_delete_other_property_and_type() {
 		try {
 			UpdatableProperty<String> p = db.getProperty("bar property", true).typeCheck(String.class).edit();
 			UpdatableValueType<String> vt = p.getValueType().edit();
@@ -186,7 +189,8 @@ public class T013_PropertyTest extends TestCase {
 			p.applyUpdates();
 			vt.destroy();
 			vt.applyUpdates();
-			db.getProperty("bar property", false);
+			if (db.getProperty("bar property", false) != null)
+				fail("bar property found");
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
