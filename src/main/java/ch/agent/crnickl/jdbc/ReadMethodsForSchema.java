@@ -311,10 +311,13 @@ public class ReadMethodsForSchema extends JDBCDatabaseMethods {
 	}
 
 	/**
-	 * Make an UpdatableSchema from a RawSchema.
+	 * Make an UpdatableSchema from a RawSchema. Cycles are detected but do not
+	 * result in an exception being thrown. Schemas with a cycle cannot be
+	 * resolved but can still be updated so that the problem can be fixed
+	 * without resorting to low level tools.
+	 * 
 	 * @param database
 	 * @param rawSchema
-	 * @param forceNullBase to break a cycle
 	 * @param cycleDetector
 	 * @return
 	 * @throws T2DBException
