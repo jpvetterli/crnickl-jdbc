@@ -19,7 +19,6 @@
  */
 package ch.agent.crnickl.junit;
 
-import junit.framework.TestCase;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.UpdatableChronicle;
@@ -27,36 +26,34 @@ import ch.agent.crnickl.api.UpdateEvent;
 import ch.agent.crnickl.api.UpdateEventSubscriber;
 import ch.agent.crnickl.impl.DatabaseBackend;
 
-/**
- * Test cache. is a chronicle removed from the cache when deleted,
- * but with no commit?
- * 
- * @author Jean-Paul Vetterli
- * @version 1.0.0
- */
-public class T005_CacheTest extends TestCase {
+public class T005_CacheTest extends AbstractTest {
 
-	private Database db;
+	private static Boolean DUMP = false;
+	private static Database db;
+	private static boolean notified = false;
 	
 	@Override
-	protected void setUp() throws Exception {
+	protected void firstSetUp() throws Exception {
 		db = DBSetUp.getDatabase();
 		db.rollback(); // avoid logging events from previous test(s)
 		((DatabaseBackend) db).setStrictNameSpaceMode(false);
 		db.getUpdateEventPublisher().subscribe(new UpdateEventSubscriber() {
 			@Override
 			public void notify(UpdateEvent event) {
-				System.err.println("T005* " + event.toString());
+				notified = true;
+				if (DUMP)
+					System.err.println("T005* " + event.toString());
 			}
 		}, DBObjectType.CHRONICLE, true);
-		DBSetUp.getDatabaseManager().deleteChronicleCollection("bt.test");
+		Util.deleteChronicles(db, "bt.test");
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	protected void lastTearDown() throws Exception {
 		db.getUpdateEventPublisher().unsubscribeAll();
 		((DatabaseBackend) db).setStrictNameSpaceMode(true);
+		if (!notified)
+			fail("no notification seen");
 	}
 
 	/**

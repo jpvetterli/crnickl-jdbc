@@ -19,10 +19,10 @@
  */
 package ch.agent.crnickl.junit;
 
-import junit.framework.TestCase;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Chronicle;
+import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Property;
@@ -33,17 +33,17 @@ import ch.agent.crnickl.impl.SurrogateImpl;
 import ch.agent.crnickl.jdbc.JDBCObjectId;
 import ch.agent.t2.time.TimeDomain;
 
-public class T005_BasicTest extends TestCase {
+public class T005_BasicTest extends AbstractTest {
 
 	private Database db;
 	private static boolean clean;
 	private static final String BASE = "bt.basictest";
 	private static final String ENTITY = "bt.basictest.test";
 	
-	private JDBCObjectId id(int id) {
+	private DBObjectId id(int id) {
 		return new JDBCObjectId(id);
 	}
-	
+		
 	@Override
 	protected void setUp() throws Exception {
 		db = DBSetUp.getDatabase();
@@ -54,8 +54,7 @@ public class T005_BasicTest extends TestCase {
 				Chronicle base = db.getChronicle(split[0], true);
 				base.edit().createChronicle(split[1], false, "Unit tests", null, null).applyUpdates();
 			} else
-				new SpecialMethodsForChronicles().deleteChronicleCollection(basic);
-//			db.commit();
+				Util.deleteChronicleCollection(basic);
 			clean = true;
 		}
 	}
@@ -65,7 +64,6 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e = db.getChronicle(BASE, true);
 			assertEquals(BASE, e.getName(true));
 		} catch (Exception e) {
-//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -73,9 +71,9 @@ public class T005_BasicTest extends TestCase {
 	public void test2() {
 		try {
 			db.getChronicle("foo.bar", true);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D40103, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D40103);
 		}
 	}
 
@@ -84,8 +82,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e1 = db.getChronicle(BASE, true);
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1, e2);
-		} catch (T2DBException e) {
-//			e.printStackTrace();
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -95,8 +92,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e1 = db.getChronicle(BASE, true);
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1.getSchema(true), e2.getSchema(true));
-		} catch (T2DBException e) {
-//			e.printStackTrace();
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -106,8 +102,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e1 = db.getChronicle(BASE, true);
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1.getCollection(), e2.getCollection());
-		} catch (T2DBException e) {
-//			e.printStackTrace();
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -116,9 +111,9 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Chronicle e = db.getChronicle(db.getTopChronicle().getName(true), true);
 			e.getAttribute("Currency", true);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D40101, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D40101);
 		}
 	}
 
@@ -126,7 +121,7 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Chronicle e = db.getChronicle(db.getTopChronicle().getName(true), true);
 			assertNull(e.getSurrogate().getObject());
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.toString());
 		}
 	}
@@ -139,9 +134,9 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Chronicle e1 = db.getChronicle(db.getTopChronicle().getName(true), true);
 			db.getChronicle(e1.getSurrogate());
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D02102, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D02102);
 		}
 	}
 	
@@ -149,9 +144,9 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Chronicle e = db.getChronicle(BASE, true);
 			e.getAttribute("Currency", true);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D40114, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D40114);
 		}
 	}
 	
@@ -160,7 +155,6 @@ public class T005_BasicTest extends TestCase {
 			String[] split = db.getNamingPolicy().split(ENTITY);
 			Chronicle base = db.getChronicle(split[0], true);
 			base.edit().createChronicle(split[1], false, "test entity", null, null).applyUpdates();
-//			db.commit();
 			assertEquals(ENTITY, db.getChronicle(ENTITY, true).getName(true));
 		} catch (T2DBException e) {
 			fail(e.getMessage());
@@ -171,7 +165,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e1 = db.getChronicle(ENTITY, true);
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1, e2);
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -181,8 +175,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e1 = db.getChronicle(ENTITY, true);
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1.getSchema(true), e2.getSchema(true));
-		} catch (T2DBException e) {
-//			e.printStackTrace();
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -192,8 +185,7 @@ public class T005_BasicTest extends TestCase {
 			Chronicle e1 = db.getChronicle(ENTITY, true);
 			Chronicle e2 = db.getChronicle(e1.getSurrogate());
 			assertEquals(e1.getCollection(), e2.getCollection());
-		} catch (T2DBException e) {
-//			e.printStackTrace();
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -205,9 +197,9 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, id(42));
 			db.getSeries(k);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D02102, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D02102);
 		}
 	}
 
@@ -218,9 +210,9 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, id(42));
 			db.getSchema(k);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D02102, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D02102);
 		}
 	}
 
@@ -231,9 +223,9 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, id(42));
 			db.getProperty(k);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D02102, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D02102);
 		}
 	}
 
@@ -244,9 +236,9 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.CHRONICLE, id(42));
 			db.getValueType(k);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D02102, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D02102);
 		}
 	}
 
@@ -257,9 +249,9 @@ public class T005_BasicTest extends TestCase {
 		try {
 			Surrogate k = new SurrogateImpl((DatabaseBackend)db, DBObjectType.SCHEMA, id(42));
 			db.getChronicle(k);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D02102, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D02102);
 		}
 	}
 	
@@ -270,52 +262,48 @@ public class T005_BasicTest extends TestCase {
 	 */
 	public void test19() {
 		try {
-			Property<?> nameProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, id(1)));
+			Property<?> nameProp = db.getProperty("Symbol", true);
 			assertEquals("NAME", nameProp.getValueType().getExternalRepresentation());
-			Property<?> typeProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, id(2)));
+			Property<?> typeProp = db.getProperty("Type", true);
 			assertEquals("TYPE", typeProp.getValueType().getExternalRepresentation());
-			Property<?> tdProp = db.getProperty(new SurrogateImpl((DatabaseBackend) db, DBObjectType.PROPERTY, id(3)));
+			Property<?> tdProp = db.getProperty("Calendar", true);
 			assertEquals("TIMEDOMAIN", tdProp.getValueType().getExternalRepresentation());
 			assertFalse(nameProp.getValueType().isRestricted());
 			assertTrue(tdProp.getValueType().getValues().size() >= 5);
-			if (DBSetUp.inMemory())
+			//if (DBSetUp.inMemory())
 				assertEquals(1, typeProp.getValueType().getValues().size()); // "number" defined in the DDL
 		} catch (Exception e) {
-//			e.printStackTrace();
 			fail(e.toString());
 		}
 	}
 	
 	public <S>void test20() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, id(2));
 			@SuppressWarnings("unchecked")
-			UpdatableValueType<S> vt = (UpdatableValueType<S>) db.getValueType(k).edit();
+			UpdatableValueType<S> vt = (UpdatableValueType<S>) db.getValueType("type").edit();
 			vt.addValue(vt.scan("foo"), null);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D10107, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D10107);
 		}
 	}
 	
 	public void test21() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, id(3));
-			UpdatableValueType<TimeDomain> vt = db.getValueType(k).typeCheck(TimeDomain.class).edit();
+			UpdatableValueType<TimeDomain> vt = db.getValueType("timedomain").typeCheck(TimeDomain.class).edit();
 			vt.updateValue(vt.scan("daily"), "new daily");
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.toString());
 		}
 	}
 	
 	public void test22() {
 		try {
-			Surrogate k = new SurrogateImpl((DatabaseBackend) db, DBObjectType.VALUE_TYPE, id(2));
-			UpdatableValueType<TimeDomain> vt = db.getValueType(k).typeCheck(TimeDomain.class).edit();
+			UpdatableValueType<TimeDomain> vt = db.getValueType("type").typeCheck(TimeDomain.class).edit();
 			vt.updateValue(vt.scan("daily"), "new daily");
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D10101, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D10101);
 		}
 	}
 

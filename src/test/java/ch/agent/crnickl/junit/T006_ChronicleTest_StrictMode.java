@@ -19,7 +19,6 @@
  */
 package ch.agent.crnickl.junit;
 
-import junit.framework.TestCase;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Chronicle;
@@ -34,7 +33,7 @@ import ch.agent.crnickl.impl.DatabaseBackend;
  * @author Jean-Paul Vetterli
  * @version 1.0.0
  */
-public class T006_ChronicleTest_StrictMode extends TestCase {
+public class T006_ChronicleTest_StrictMode extends AbstractTest {
 
 	private Database db;
 	private static boolean clean;
@@ -47,13 +46,12 @@ public class T006_ChronicleTest_StrictMode extends TestCase {
 		if (!clean) {
 			Chronicle testData = db.getChronicle(FULLNAME, false);
 			if (testData != null) {
-				new SpecialMethodsForChronicles().deleteChronicleCollection(testData);
+				Util.deleteChronicleCollection(testData);
 				UpdatableChronicle upd = testData.edit();
 				upd.destroy();
 				upd.applyUpdates();
 			}
 			db.getTopChronicle().edit().createChronicle(SIMPLENAME, false, "standalone test", null, null).applyUpdates();
-//			db.commit();
 			clean = true;
 		}
 	}
@@ -66,7 +64,7 @@ public class T006_ChronicleTest_StrictMode extends TestCase {
 			ex.applyUpdates();
 			Chronicle ent = db.getChronicle(FULLNAME + ".x", true);
 			assertEquals(FULLNAME + ".x", ent.getName(true));
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.toString());
 		}
 	}
@@ -75,9 +73,9 @@ public class T006_ChronicleTest_StrictMode extends TestCase {
 		assertTrue(((DatabaseBackend) db).isStrictNameSpaceMode());
 		try {
 			db.getChronicle(SIMPLENAME + ".x", true);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D40103, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D40103);
 		}
 	}
 	

@@ -21,9 +21,6 @@ package ch.agent.crnickl.junit;
 
 import java.util.Collection;
 
-import junit.framework.TestCase;
-import ch.agent.core.KeyedException;
-import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Attribute;
 import ch.agent.crnickl.api.AttributeDefinition;
@@ -38,13 +35,22 @@ import ch.agent.crnickl.api.UpdatableValueType;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.t2.time.Day;
 
-public class T015_SchemaChronicleSeriesValueTest extends TestCase {
+public class T015_SchemaChronicleSeriesValueTest extends AbstractTest {
 
-	private Database db;
+	private static Database db;
 	
 	@Override
-	protected void setUp() throws Exception {
+	protected void firstSetUp() throws Exception {
 		db = DBSetUp.getDatabase();
+	}
+
+	@Override
+	protected void lastTearDown() throws Exception {
+		// the sequence is important
+		Util.deleteChronicles(db, "bt.fooent");
+		Util.deleteSchema(db, "foo schema");
+		Util.deleteProperties(db, "foo property");
+		Util.deleteValueTypes(db, "foo type");
 	}
 
 	public void test012_create_type() {
@@ -74,9 +80,9 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			UpdatableValueType<String> vt = db.getValueType("foo type").typeCheck(String.class).edit();
 			vt.updateValue(vt.getScanner().scan("baz"), "BAZ");
 			vt.applyUpdates();
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D10123, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D10123);
 		}
 	}
 	
@@ -89,7 +95,7 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			vt.deleteValue(vt.getScanner().scan("baz"));
 			vt.applyUpdates();
 			assertTrue(vt.getValueDescriptions().get("baz")== null);
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.toString());
 		}
 	}
@@ -110,10 +116,9 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			UpdatableValueType<String> type = db.getValueType("foo type").typeCheck(String.class).edit();
 			type.destroy();
 			type.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("J10115", e.getMsg().getKey());
-			assertEquals("J10119", ((KeyedException)e.getCause()).getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D10145, D.D10149);
 		}
 	}
 	
@@ -158,7 +163,6 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			s.setValue(Day.DOMAIN.time("2011-06-30"), 42.);
 			s.applyUpdates();
 		} catch (Exception e) {
-//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -174,7 +178,6 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			s.setValue(Day.DOMAIN.time("2011-06-30"), Double.NaN);
 			s.applyUpdates();
 		} catch (Exception e) {
-//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -185,10 +188,9 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			Attribute<String> attr = ent.getAttribute("foo property", true).typeCheck(String.class);
 			assertEquals("bar", attr.get());
 			attr.set("baz");
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D20110, e.getMsg().getKey());
-			assertEquals(D.D10115, ((T2DBException) e.getCause()).getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D20110, D.D10115);
 		}
 	}
 	
@@ -231,15 +233,20 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 			UpdatableValueType<String> type = db.getValueType("foo type").typeCheck(String.class).edit();
 			type.deleteValue("baz");
 			type.applyUpdates();
-			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals("J10116", e.getMsg().getKey());
-			try {
-				assertEquals("J10128", ((KeyedException)e.getCause()).getMsg().getKey());
-			} catch (Exception e1) {
-				// oops!
-				fail(e.getCause().getMessage());
-			}
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D10146, D.D10158);
+		}
+	}
+	
+	public void test051_delete_value_type_value_used_as_default() {
+		try {
+			UpdatableValueType<String> type = db.getValueType("foo type").typeCheck(String.class).edit();
+			type.deleteValue("bar");
+			type.applyUpdates();
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D10146, D.D10157);
 		}
 	}
 
@@ -258,6 +265,6 @@ public class T015_SchemaChronicleSeriesValueTest extends TestCase {
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
-	}
+	}	
 	
 }

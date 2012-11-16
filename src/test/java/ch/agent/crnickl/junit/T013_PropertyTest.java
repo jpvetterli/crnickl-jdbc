@@ -27,7 +27,6 @@ import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.UpdatableProperty;
 import ch.agent.crnickl.api.UpdatableValueType;
 import ch.agent.crnickl.api.ValueType;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * These tests must be executed together. They build upon each other. 
@@ -98,7 +97,7 @@ public class T013_PropertyTest extends AbstractTest {
 			p.applyUpdates();
 			expectException();
 		} catch (Exception e) {
-			assertException(e, J.J20114);
+			assertException(e, D.D20114);
 		}
 	}
 	
@@ -142,6 +141,27 @@ public class T013_PropertyTest extends AbstractTest {
 		}
 	}
 	
+	public void test_get_all_properties() {
+		try {
+			Collection<Property<?>> props = db.getProperties(null);
+			if (DUMP) {
+				for (Property<?> prop : props) {
+					System.err.println(prop.toString());
+					ValueType<?> vt = prop.getValueType();
+					System.err.println("  " + vt.toString());
+					if (vt.isRestricted()) {
+						for (String v : vt.getValues(null)) {
+							System.err.println("    " + v);
+						}
+					}
+				}
+			}
+			assertEquals(6, props.size()); // 2 + 4 built-in properties
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+	
 	public void test_rename_property() {
 		try {
 			UpdatableProperty<String> p = db.getProperty("foo property", true).typeCheck(String.class).edit();
@@ -162,7 +182,7 @@ public class T013_PropertyTest extends AbstractTest {
 			type.applyUpdates();
 			expectException();
 		} catch (Exception e) {
-			assertException(e, J.J10115, J.J10119);
+			assertException(e, D.D10145, D.D10149);
 		}
 	}
 	

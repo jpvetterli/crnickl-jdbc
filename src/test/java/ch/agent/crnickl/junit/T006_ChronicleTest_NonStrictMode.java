@@ -19,8 +19,6 @@
  */
 package ch.agent.crnickl.junit;
 
-import junit.framework.TestCase;
-import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.UpdatableChronicle;
@@ -33,7 +31,7 @@ import ch.agent.crnickl.impl.DatabaseBackend;
  * @author Jean-Paul Vetterli
  * @version 1.0.0
  */
-public class T006_ChronicleTest_NonStrictMode extends TestCase {
+public class T006_ChronicleTest_NonStrictMode extends AbstractTest {
 
 	private Database db;
 	private static boolean clean;
@@ -53,14 +51,13 @@ public class T006_ChronicleTest_NonStrictMode extends TestCase {
 		if (!clean) {
 			Chronicle testData = db.getChronicle(SIMPLENAME, false);
 			if (testData != null) {
-				new SpecialMethodsForChronicles().deleteChronicleCollection(testData);
+				Util.deleteChronicleCollection(testData);
 				UpdatableChronicle upd = testData.edit();
 				upd.destroy();
 				upd.applyUpdates();
 			}
 			UpdatableChronicle ex = db.getTopChronicle().edit().createChronicle(SIMPLENAME, false, "standalone test", null, null);
 			ex.applyUpdates();
-//			db.commit();
 			clean = true;
 		}
 	}
@@ -73,7 +70,7 @@ public class T006_ChronicleTest_NonStrictMode extends TestCase {
 			ex.applyUpdates();
 			Chronicle ent = db.getChronicle(SIMPLENAME + ".x", true);
 			assertEquals(SIMPLENAME + ".x", ent.getName(true));
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.toString());
 		}
 	}
@@ -83,7 +80,7 @@ public class T006_ChronicleTest_NonStrictMode extends TestCase {
 		try {
 			Chronicle en = db.getChronicle(SIMPLENAME + ".x", true);
 			assertEquals(SIMPLENAME + ".x", en.getName(true));
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.toString());
 		}
 	}
@@ -94,7 +91,7 @@ public class T006_ChronicleTest_NonStrictMode extends TestCase {
 			// full name tolerated in non-strict mode
 			Chronicle en = db.getChronicle(FULLNAME + ".x", true);
 			assertEquals(SIMPLENAME + ".x", en.getName(true));
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.toString());
 		}
 	}

@@ -29,7 +29,6 @@ import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.Series;
 import ch.agent.crnickl.api.UpdatableChronicle;
-import ch.agent.crnickl.api.UpdatableProperty;
 import ch.agent.crnickl.api.UpdatableSchema;
 import ch.agent.crnickl.api.UpdatableSeries;
 import ch.agent.crnickl.api.UpdatableValueType;
@@ -39,33 +38,51 @@ import ch.agent.t2.time.Workday;
 
 public class T017_SchemaTest extends AbstractTest {
 
-	private Database db;
+	private static Database db;
+	private static Boolean DEBUG = false;
 	
 	@Override
-	protected void setUp() throws Exception {
+	protected void firstSetUp() throws Exception {
 		db = DBSetUp.getDatabase();
+		// create 2 value types
+		UpdatableValueType<String> vt1 = db.createValueType("type1", true, "TEXT");
+		vt1.addValue(vt1.getScanner().scan("t1v1"), "type1 value1");
+		vt1.addValue(vt1.getScanner().scan("t1v2"), "type1 value2");
+		vt1.addValue(vt1.getScanner().scan("t1v3"), "type1 value3");
+		vt1.applyUpdates();
+		UpdatableValueType<String> vt2 = db.createValueType("type2", true, "TEXT");
+		vt2.addValue(vt2.getScanner().scan("t2v2"), "type2 value2");
+		vt2.applyUpdates();
+		UpdatableValueType<String> vt3 = db.createValueType("type3", false, "TEXT");
+		vt3.applyUpdates();
+
+		// create 2 properties
+		db.createProperty("prop1", vt1, false).applyUpdates();
+		db.createProperty("prop2", vt2, false).applyUpdates();
+		db.createProperty("prop3", vt3, false).applyUpdates();
+
+		db.commit();
+	}
+	
+	@Override
+	protected void lastTearDown() throws Exception {
+		Util.deleteChronicles(db, "bt.schema1achro", "bt.schema4chro", "bt.schema3chro");
+		Util.deleteSchema(db, "schema1f", "schema5", "schema4", "schema3", "schema2","schema1a");
+		if (DEBUG)
+			listSchemas("schema*");
+		Util.deleteProperties(db, "prop1", "prop2", "prop3");
+		Util.deleteValueTypes(db, "type1", "type2", "type3");
+		db.commit();
 	}
 
-	public void test_create_some_types_and_properties() {
-		try {
-			// create 2 value types
-			UpdatableValueType<String> vt1 = db.createValueType("type1", true, "TEXT");
-			vt1.addValue(vt1.getScanner().scan("t1v1"), "type1 value1");
-			vt1.addValue(vt1.getScanner().scan("t1v2"), "type1 value2");
-			vt1.addValue(vt1.getScanner().scan("t1v3"), "type1 value3");
-			vt1.applyUpdates();
-			UpdatableValueType<String> vt2 = db.createValueType("type2", true, "TEXT");
-			vt2.addValue(vt2.getScanner().scan("t2v2"), "type2 value2");
-			vt2.applyUpdates();
-			UpdatableValueType<String> vt3 = db.createValueType("type3", false, "TEXT");
-			vt3.applyUpdates();
-
-			// create 2 properties
-			db.createProperty("prop1", vt1, false).applyUpdates();
-			db.createProperty("prop2", vt2, false).applyUpdates();
-			db.createProperty("prop3", vt3, false).applyUpdates();
-		} catch (T2DBException e) {
-			fail(e.getMessage());
+	private void listSchemas(String pattern) throws Exception {
+		Collection<UpdatableSchema> schemas = db.getUpdatableSchemas(pattern);
+		for (UpdatableSchema schema : schemas) {
+			UpdatableSchema base = schema.getBase();
+			if (base == null)
+				System.out.println(schema.getName());
+			else
+				System.out.println(schema.getName() + "--->" + schema.getBase().getName());
 		}
 	}
 	
@@ -286,7 +303,7 @@ public class T017_SchemaTest extends AbstractTest {
 			 * schemas (see earlier test). This showed a bug making it
 			 * impossible to delete a chronicle with no series defined.
 			 */
-			deleteChron("bt.schema5chro");
+			Util.deleteChronicles(db, "bt.schema5chro");
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
@@ -668,80 +685,6 @@ public class T017_SchemaTest extends AbstractTest {
 			expectException();
 		} catch (Exception e) {
 			assertException(e, D.D30140);
-		}
-	}
-	
-	public void test_delete_chronicles() {
-		try {
-			deleteChron("bt.schema1achro", "bt.schema4chro", "bt.schema3chro");
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
-	}
-	
-	public void test_delete_schemas() {
-		try {
-			int count = 1;
-			Collection<UpdatableSchema> schemas = null;
-			boolean retry = true;
-			while (retry) {
-				retry = false;
-				schemas = db.getUpdatableSchemas("schema*");
-				for (UpdatableSchema schema : schemas) {
-					try {
-						schema.destroy();
-						schema.applyUpdates();
-					} catch (Exception e) {
-						// loop a few times to get schema dependencies
-						if (count++ > 6) {
-							throw new RuntimeException(e);
-						}
-						retry = true;
-					}
-				}
-			}
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
-	}
-	
-	public void test_cleanup() {
-		try {
-			deleteProp("prop1", "prop2", "prop3");
-			deleteVT("type1", "type2", "type3");
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
-	}
-
-	private void deleteChron(String... chrons) throws Exception {
-		for (String chron : chrons) {
-			UpdatableChronicle chro = db.getChronicle(chron, true).edit();
-			for (Series<?> s : chro.getSeries()) {
-				UpdatableSeries<?> us = s.edit();
-				us.setRange(null);
-				us.applyUpdates();
-				us.destroy();
-				us.applyUpdates();
-			}
-			chro.destroy();
-			chro.applyUpdates();
-		}
-	}
-	
-	private void deleteProp(String... props) throws Exception {
-		for (String prop : props) {
-			UpdatableProperty<?> p = db.getProperty(prop, true).edit();
-			p.destroy();
-			p.applyUpdates();
-		}
-	}
-	
-	private void deleteVT(String... vts) throws Exception {
-		for (String vt : vts) {
-			UpdatableValueType<?> v = db.getValueType(vt).edit();
-			v.destroy();
-			v.applyUpdates();
 		}
 	}
 	

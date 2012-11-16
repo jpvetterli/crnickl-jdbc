@@ -31,13 +31,10 @@ public class AllTests {
 		suite.addTestSuite(T005_CacheTest.class);
 		suite.addTestSuite(T006_ChronicleTest_StrictMode.class);
 		suite.addTestSuite(T006_ChronicleTest_NonStrictMode.class);
-		if (DBSetUp.inMemory()) {
-			suite.addTestSuite(T012_ValueTypeTest.class);
-			suite.addTestSuite(T013_PropertyTest.class);
-			suite.addTestSuite(T015_SchemaChronicleSeriesValueTest.class);
-			suite.addTestSuite(T017_SchemaTest.class);
-		}
-		suite.addTestSuite(T022_DeleteChronicleTest.class);
+		suite.addTestSuite(T012_ValueTypeTest.class);
+		suite.addTestSuite(T013_PropertyTest.class);
+		suite.addTestSuite(T015_SchemaChronicleSeriesValueTest.class);
+		suite.addTestSuite(T017_SchemaTest.class);
 		suite.addTestSuite(T040_SeriesTest.class);
 		suite.addTestSuite(T041_UpdatableSeriesTest.class);
 		suite.addTestSuite(T042_SeriesValuesTest.class);

@@ -36,9 +36,6 @@ import ch.agent.crnickl.jdbc.JDBCDatabase;
 
 public class DBSetUp {
 	
-	public static final String BASE_NAME = "bt.junit";
-	public static final String SIMPLE_NAME = "junit";
-
 	private static final String DDL = "sql/HyperSQL_DDL_base.sql";
 	public static boolean MEMORY_DB = true;
 	public static boolean STANDARD_REGEXP = false;
@@ -147,17 +144,12 @@ public class DBSetUp {
 		}
 	}
 	
-	public static SimpleDatabaseManager getDatabaseManager() throws Exception {
-		try {
-			setup();
-		} catch (Exception e) {
-			e.printStackTrace();
-			error = true;
-		}
-		return dbm;
-	}
-	
 	public static boolean inMemory() {
 		return MYSQL_PARM_FILE == null && MEMORY_DB;
 	}
+	
+	public static boolean canRollback() {
+		return true;
+	}
+
 }

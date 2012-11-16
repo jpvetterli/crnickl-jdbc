@@ -19,7 +19,6 @@
  */
 package ch.agent.crnickl.junit;
 
-import junit.framework.TestCase;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Attribute;
@@ -27,37 +26,36 @@ import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.UpdatableChronicle;
 
-public class T050_ChronicleTest extends TestCase {
+public class T050_ChronicleTest extends AbstractTest {
 
-	private Database db;
-	private static boolean clean;
+	private static Database db;
 	private static final String FULLNAME = "bt.entitytest";
 	private static final String SIMPLENAME = "entitytest";
 	
 	@Override
-	protected void setUp() throws Exception {
+	protected void firstSetUp() throws Exception {
 		db = DBSetUp.getDatabase();
-		if (!clean) {
-			Chronicle testData = db.getChronicle(FULLNAME, false);
-			if (testData != null) {
-				new SpecialMethodsForChronicles().deleteChronicleCollection(testData);
-				UpdatableChronicle upd = testData.edit();
-				upd.destroy();
-				upd.applyUpdates();
-//				db.commit();
-			}
-			clean = true;
+		Chronicle testData = db.getChronicle(FULLNAME, false);
+		if (testData != null) {
+			Util.deleteChronicleCollection(testData);
+			UpdatableChronicle upd = testData.edit();
+			upd.destroy();
+			upd.applyUpdates();
+			db.commit();
 		}
 	}
 	
+	@Override
+	protected void lastTearDown() throws Exception {
+		Util.deleteChronicles(db, FULLNAME);
+	}
+
 	public void test1() {
 		try {
 			UpdatableChronicle testEntity = ((UpdatableChronicle)db.getTopChronicle()).createChronicle(SIMPLENAME, false, "test", null, null);
 			testEntity.applyUpdates();
 			assertEquals(FULLNAME, testEntity.getName(true));
-//			db.commit();
 		} catch (Exception e) {
-//			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
@@ -66,9 +64,9 @@ public class T050_ChronicleTest extends TestCase {
 		try {
 			UpdatableChronicle testEntity = ((UpdatableChronicle)db.getTopChronicle()).createChronicle(SIMPLENAME, false, "test", null, null);
 			testEntity.applyUpdates();
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D40126, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D40126);
 		}
 	}
 	
@@ -77,9 +75,8 @@ public class T050_ChronicleTest extends TestCase {
 			UpdatableChronicle testEntity = db.getChronicle(FULLNAME, true).edit();
 			testEntity.destroy();
 			testEntity.applyUpdates();
-//			db.commit();
 			assertFalse(testEntity.getSurrogate().getObject().isValid());
-		} catch (T2DBException e) {
+		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
@@ -87,19 +84,19 @@ public class T050_ChronicleTest extends TestCase {
 	public void test4() {
 		// original bug: NPE when getting non-existing attribute of entity in construction 
 		try {
-			UpdatableChronicle e = db.getTopChronicle().edit().createChronicle(DBSetUp.SIMPLE_NAME, false, "junit test 001", null, null);
+			UpdatableChronicle e = db.getTopChronicle().edit().createChronicle(SIMPLENAME, false, "junit test 001", null, null);
 			Attribute<?> a = e.getAttribute("foo", false);
 			assertNull(a);
 			a = e.getAttribute("bar", true);
-			fail("exception expected");
-		} catch (T2DBException e) {
-			assertEquals(D.D40114, e.getMsg().getKey());
+			expectException();
+		} catch (Exception e) {
+			assertException(e, D.D40114);
 		}
 	}
 	
 	public void test5() {
 		try {
-			UpdatableChronicle e = db.getTopChronicle().edit().createChronicle(DBSetUp.SIMPLE_NAME, false, "junit test 001", null, null);
+			UpdatableChronicle e = db.getTopChronicle().edit().createChronicle(SIMPLENAME, false, "junit test 001", null, null);
 			e.applyUpdates();
 			Attribute<?> a = e.getAttribute("foo", false);
 			assertNull(a);
@@ -113,7 +110,7 @@ public class T050_ChronicleTest extends TestCase {
 	public void test6() {
 		// original bug: NPE when creating non-existing attribute of entity in construction 
 		try {
-			UpdatableChronicle e = db.getChronicle(DBSetUp.BASE_NAME, true).edit();
+			UpdatableChronicle e = db.getChronicle(FULLNAME, true).edit();
 			e.createSeries("foo");
 			fail("exception expected");
 		} catch (T2DBException e) {

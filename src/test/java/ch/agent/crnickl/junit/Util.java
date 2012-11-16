@@ -21,14 +21,18 @@ package ch.agent.crnickl.junit;
 
 import ch.agent.core.KeyedException;
 import ch.agent.crnickl.api.Chronicle;
+import ch.agent.crnickl.api.Database;
+import ch.agent.crnickl.api.Schema;
 import ch.agent.crnickl.api.Series;
 import ch.agent.crnickl.api.UpdatableChronicle;
+import ch.agent.crnickl.api.UpdatableProperty;
+import ch.agent.crnickl.api.UpdatableSchema;
 import ch.agent.crnickl.api.UpdatableSeries;
-import ch.agent.crnickl.jdbc.JDBCDatabaseMethods;
+import ch.agent.crnickl.api.UpdatableValueType;
 
-public class SpecialMethodsForChronicles extends JDBCDatabaseMethods {
+public class Util {
 	
-	public SpecialMethodsForChronicles() throws KeyedException {
+	private Util() {
 	}
 
 	/**
@@ -41,33 +45,61 @@ public class SpecialMethodsForChronicles extends JDBCDatabaseMethods {
 	 * @return
 	 * @throws KeyedException
 	 */
-	public int[] deleteChronicleCollection(Chronicle chronicle) throws KeyedException {
-		return deleteChronicle(chronicle, true);
+	public static void deleteChronicleCollection(Chronicle chronicle) throws KeyedException {
+		deleteChronicle(chronicle, true);
 	}
 	
-	private int[] deleteChronicle(Chronicle chronicle, boolean top) throws KeyedException {
-		int ecount = 0;
-		int scount = 0;
+	private static void deleteChronicle(Chronicle chronicle, boolean keepTop) throws KeyedException {
 		for (Series<?> s : chronicle.getSeries()) {
 			UpdatableSeries<?> us = s.edit();
 			us.setRange(null);
 			us.applyUpdates();
 			us.destroy();
 			us.applyUpdates();
-			scount++;
 		}
 		for (Chronicle e : chronicle.getMembers()) {
-			int[] counts = deleteChronicle(e, false);
-			ecount += counts[0];
-			scount += counts[1];
+			deleteChronicle(e, false);
 		}
-		if (!top) {
+		if (!keepTop) {
 			UpdatableChronicle ue = chronicle.edit();
 			ue.destroy();
 			ue.applyUpdates();
-			ecount++;
 		}
-		return new int[] { ecount, scount };
 	}
 
+	public static void deleteChronicles(Database db, String... chrons) throws Exception {
+		for (String chron : chrons) {
+			Chronicle chronicle = db.getChronicle(chron, false);
+			if (chronicle != null)
+				deleteChronicle(db.getChronicle(chron, true), false);
+		}
+	}
+	
+	public static void deleteProperties(Database db, String... props) throws Exception {
+		for (String prop : props) {
+			UpdatableProperty<?> p = db.getProperty(prop, true).edit();
+			p.destroy();
+			p.applyUpdates();
+		}
+	}
+	
+	public static void deleteValueTypes(Database db, String... vts) throws Exception {
+		for (String vt : vts) {
+			UpdatableValueType<?> v = db.getValueType(vt).edit();
+			v.destroy();
+			v.applyUpdates();
+		}
+	}
+
+	public static void deleteSchema(Database db, String... schemas) throws Exception {
+		for (String schema : schemas) {
+			for (Schema s : db.getSchemas(schema)) {
+				UpdatableSchema usch = s.edit();
+				usch.destroy();
+				usch.applyUpdates();
+			}
+		}
+	}
+	
+	
 }

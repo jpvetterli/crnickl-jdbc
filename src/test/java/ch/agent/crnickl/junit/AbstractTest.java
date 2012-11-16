@@ -1,13 +1,62 @@
 package ch.agent.crnickl.junit;
 
-import ch.agent.core.KeyedException;
+import java.lang.reflect.Method;
+
 import junit.framework.TestCase;
+import ch.agent.core.KeyedException;
 
 public class AbstractTest extends TestCase {
 	
 	private static final String EXCEPTION_EXPECTED = "Exception expected";
 	private static final String NOT_KEYED = "Not keyed (%s): %s";
 	
+	private static int testCount= -1;
+	
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		if (testCount < 0) {
+			testCount = 0;
+			for (Method m : this.getClass().getMethods()) {
+				if (m.getName().startsWith("test"))
+					testCount++;
+			}
+			firstSetUp();
+		}
+	}
+	
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		if (testCount > 0) {
+			testCount--;
+			if (testCount == 0) {
+				lastTearDown();
+				testCount = -1;
+			}
+		}
+	}
+
+	/**
+	 * This method is called by {@link setUp} before the first test. 
+	 * So if you override <code>setUp</code>, you must call super.
+	 * By default the method does nothing.
+	 * 
+	 * @throws Exception
+	 */
+	protected void firstSetUp()  throws Exception {
+	}
+	
+	/**
+	 * This method is called by {@link tearDown} after the last test. 
+	 * So if you override <code>tearDown</code>, you must call super.
+	 * By default the method does nothing.
+	 * 
+	 * @throws Exception
+	 */
+	protected void lastTearDown()  throws Exception {
+	}
+
 	/**
 	 * Fail with a message stating that an exception should have been thrown.
 	 */

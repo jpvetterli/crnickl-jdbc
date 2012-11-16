@@ -21,7 +21,6 @@ package ch.agent.crnickl.junit;
 
 import java.util.List;
 
-import junit.framework.TestCase;
 import ch.agent.crnickl.api.Attribute;
 import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.Property;
@@ -30,110 +29,77 @@ import ch.agent.crnickl.api.UpdatableChronicle;
 import ch.agent.crnickl.api.UpdatableProperty;
 import ch.agent.crnickl.api.UpdatableSchema;
 import ch.agent.crnickl.api.UpdatableValueType;
-import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.t2.time.Day;
 
-public class T060_ByAttributeValueTest extends TestCase {
+public class T060_ByAttributeValueTest extends AbstractTest {
 
-	private DatabaseBackend db;
-	private static boolean initialized;
+	private static DatabaseBackend db;
 	
 	@Override
-	protected void setUp() throws Exception {
+	protected void firstSetUp() throws Exception {
 		db = (DatabaseBackend) DBSetUp.getDatabase();
-		if (!initialized) {
-			setup1();
-			setup2();
-			initialized = true;
-		}
+		setup1();
+		setup2();
 	}
 	
-	private void setup1() {
-		try {
-			
-			// DIRTY HACK ahead
-			try {
-				db.getValueType("xnumber");
-				// no exception, setup already done in other test case
-				new SpecialMethodsForChronicles().deleteChronicleCollection(db.getTopChronicle());
-				return; 
-			} catch (Exception e) {
-				// not found, so continue
-			}
-			
-			// create "xnumber" value type
-			UpdatableValueType<String> vt = db.createValueType("xnumber", false, "NUMBER");
-			vt.applyUpdates();
-			
-			// add it to value list of "type" builtin value type
-			@SuppressWarnings("rawtypes")
-			UpdatableValueType<ValueType> uvtvt = db.getTypeBuiltInProperty().getValueType().typeCheck(ValueType.class).edit();
-			uvtvt.addValue(uvtvt.getScanner().scan("xnumber"), null);
-			uvtvt.applyUpdates();
-			
-			// create "Ticker" value type
-			vt = db.createValueType("Ticker", false, "TEXT");
-			vt.applyUpdates();
-			
-			// create "Ticker" property
-			UpdatableProperty<String> p = db.createProperty("Ticker", vt, true);
-			p.applyUpdates();
-			
-			// create "Stocks" schema, with a "Ticker" property and a "price" series
-			UpdatableSchema schema = db.createSchema("Stocks", null);
-			schema.addAttribute(2);
-			schema.setAttributeProperty(2, p);
-			schema.addSeries(1);
-			schema.setSeriesName(1, "price");
-			schema.setSeriesType(1, "xnumber");
-			schema.setSeriesTimeDomain(1, Day.DOMAIN);
-			schema.applyUpdates();
-			
-			db.commit();
-		} catch (Exception e) {
-//			e.printStackTrace();
-			fail(e.getMessage());
-		}
+	@Override
+	protected void lastTearDown() throws Exception {
+		Util.deleteChronicles(db, "bt.sm");
+		Util.deleteSchema(db, "Stocks");
+		Util.deleteProperties(db, "Ticker");
+		Util.deleteValueTypes(db, "Ticker");
 	}
 
-	private void setup2() {
-		try {
-			Schema stocks = db.getSchemas("Stocks").iterator().next();
-			UpdatableChronicle sm = db.getTopChronicle().edit().createChronicle("sm", false, "Stock markets", null, stocks);
-			sm.applyUpdates();
+	private void setup1() throws Exception {
+		// create "Ticker" value type
+		UpdatableValueType<String> vt = db.createValueType("Ticker", false, "TEXT");
+		vt.applyUpdates();
+			
+		// create "Ticker" property
+		UpdatableProperty<String> p = db.createProperty("Ticker", vt, true);
+		p.applyUpdates();
+			
+		// create "Stocks" schema, with a "Ticker" property and a "price" series
+		UpdatableSchema schema = db.createSchema("Stocks", null);
+		schema.addAttribute(2);
+		schema.setAttributeProperty(2, p);
+		schema.addSeries(1);
+		schema.setSeriesName(1, "price");
+		schema.setSeriesType(1, "numeric");
+		schema.setSeriesTimeDomain(1, Day.DOMAIN);
+		schema.applyUpdates();
+			
+		db.commit();
+	}
 
-			UpdatableChronicle ch = sm.createChronicle("ch", false, "CH", null, null);
-			ch.applyUpdates();
-			
-			UpdatableChronicle chsun = ch.createChronicle("sunxyzzy", false, "ch's sun xyzzy", null, null);
-			Attribute<?> ticker = chsun.getAttribute("Ticker", true);
-			ticker.scan("SUN");
-			chsun.setAttribute(ticker);
-			chsun.applyUpdates();
-			
-			UpdatableChronicle us = sm.createChronicle("us", false, "US", null, null);
-			us.applyUpdates();
-			
-			UpdatableChronicle ussun = us.createChronicle("sungobdigook", false, "us's sun gobbledygook", null, null);
-			ussun.setAttribute(ticker);
-			ussun.applyUpdates();
-			
-			UpdatableChronicle ussun2 = us.createChronicle("sunco", false, "another us sun", null, null);
-			ticker.scan("SUN2");
-			ussun2.setAttribute(ticker);
-			ussun2.applyUpdates();
+	private void setup2() throws Exception {
+		Schema stocks = db.getSchemas("Stocks").iterator().next();
+		UpdatableChronicle sm = db.getTopChronicle().edit().createChronicle("sm", false, "Stock markets", null, stocks);
+		sm.applyUpdates();
 
-			System.out.println(".. " + ussun.getName(true));
-			System.out.println(".. " + us.getAttribute("Ticker", false));
-			System.out.println(".. " + ussun.getAttribute("Ticker", false));
-			System.out.println(".. " + chsun.getAttribute("Ticker", false));
-
-			db.commit();
+		UpdatableChronicle ch = sm.createChronicle("ch", false, "CH", null, null);
+		ch.applyUpdates();
 			
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
+		UpdatableChronicle chsun = ch.createChronicle("sunxyzzy", false, "ch's sun xyzzy", null, null);
+		Attribute<?> ticker = chsun.getAttribute("Ticker", true);
+		ticker.scan("SUN");
+		chsun.setAttribute(ticker);
+		chsun.applyUpdates();
+			
+		UpdatableChronicle us = sm.createChronicle("us", false, "US", null, null);
+		us.applyUpdates();
+			
+		UpdatableChronicle ussun = us.createChronicle("sungobdigook", false, "us's sun gobbledygook", null, null);
+		ussun.setAttribute(ticker);
+		ussun.applyUpdates();
+		
+		UpdatableChronicle ussun2 = us.createChronicle("sunco", false, "another us sun", null, null);
+		ticker.scan("SUN2");
+		ussun2.setAttribute(ticker);
+		ussun2.applyUpdates();
+
+		db.commit();
 	}
 	
 	public void test1() {
@@ -143,19 +109,9 @@ public class T060_ByAttributeValueTest extends TestCase {
 			@SuppressWarnings("unchecked")
 			List<Chronicle> result = ticker.getChronicles(ticker.scan("SUN"), 42);
 			assertEquals(2, result.size());
-			dump(result);
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 	}
 	
-	private void dump(List<Chronicle> result) {
-		System.out.println("+ " + getName());
-		for (Chronicle c : result) {
-			System.out.println(c.toString());
-		}
-		System.out.println("----");
-		
-	}
-
 }

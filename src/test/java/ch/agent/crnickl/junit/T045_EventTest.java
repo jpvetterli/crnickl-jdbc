@@ -19,7 +19,6 @@
  */
 package ch.agent.crnickl.junit;
 
-import junit.framework.TestCase;
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.DBObjectType;
@@ -28,7 +27,7 @@ import ch.agent.crnickl.api.UpdatableChronicle;
 import ch.agent.crnickl.api.UpdateEvent;
 import ch.agent.crnickl.api.UpdateEventSubscriber;
 
-public class T045_EventTest extends TestCase {
+public class T045_EventTest extends AbstractTest {
 	
 	private class EventTester implements UpdateEventSubscriber {
 		private UpdateEvent event;
@@ -41,25 +40,30 @@ public class T045_EventTest extends TestCase {
 		}
 	}
 	
-	private Database db;
+	private static final String FULLNAME = "bt.entity";
+	private static final String SIMPLENAME = "entity";
+	private static Database db;
 	private static EventTester tester;
 	
 	@Override
-	protected void setUp() throws Exception {
+	protected void firstSetUp() throws Exception {
 		db = DBSetUp.getDatabase();
-		if (tester == null) {
-			tester = new EventTester();
-			db.getUpdateEventPublisher().subscribe(tester, DBObjectType.CHRONICLE, false);
-		}
+		tester = new EventTester();
+		db.getUpdateEventPublisher().subscribe(tester, DBObjectType.CHRONICLE, false);
 	}
 	
+	@Override
+	protected void lastTearDown() throws Exception {
+		Util.deleteChronicles(db, FULLNAME);
+	}
+
 	public void test001() {
 		try {
-			UpdatableChronicle e = db.getTopChronicle().edit().createChronicle(DBSetUp.SIMPLE_NAME, false, "junit test 001", null, null);
-			assertEquals(DBSetUp.BASE_NAME, e.getName(true));
+			UpdatableChronicle e = db.getTopChronicle().edit().createChronicle(SIMPLENAME, false, "junit test 001", null, null);
+			assertEquals(FULLNAME, e.getName(true));
 			e.applyUpdates();
 			db.commit();
-			assertEquals(DBSetUp.BASE_NAME, ((Chronicle) tester.getEvent().getSourceOrNull()).getName(true));
+			assertEquals(FULLNAME, ((Chronicle) tester.getEvent().getSourceOrNull()).getName(true));
 		} catch (T2DBException e) {
 			fail(e.toString());
 		}
@@ -67,11 +71,11 @@ public class T045_EventTest extends TestCase {
 	
 	public void test002() {
 		try {
-			UpdatableChronicle e = db.getChronicle(DBSetUp.BASE_NAME, true).edit();
+			UpdatableChronicle e = db.getChronicle(FULLNAME, true).edit();
 			e.destroy();
 			e.applyUpdates();
 			db.commit();
-			assertEquals(db.getNamingPolicy().joinValueAndDescription(DBSetUp.BASE_NAME, "junit test 001"), tester.getEvent().getComment());
+			assertEquals(db.getNamingPolicy().joinValueAndDescription(FULLNAME, "junit test 001"), tester.getEvent().getComment());
 		} catch (Exception e) {
 			fail(e.toString());
 		}

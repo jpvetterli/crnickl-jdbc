@@ -29,7 +29,6 @@ import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.UpdatableValueType;
 import ch.agent.crnickl.api.ValueScanner;
 import ch.agent.crnickl.api.ValueType;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * These tests must be executed together. They build upon each other. 
@@ -91,7 +90,7 @@ public class T012_ValueTypeTest extends AbstractTest {
 			db.getValueType(name);
 			expectException();
 		} catch (Exception e) {
-			assertException(e, J.J10109);
+			assertException(e, D.D10109);
 		}
 	}
 	
@@ -111,7 +110,7 @@ public class T012_ValueTypeTest extends AbstractTest {
 			helper_delete_type("foo");
 			expectException();
 		} catch (Exception e) {
-			assertException(e, J.J10109);
+			assertException(e, D.D10109);
 		}
 	}
 	

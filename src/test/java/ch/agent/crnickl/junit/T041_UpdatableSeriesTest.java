@@ -1,95 +1,41 @@
 package ch.agent.crnickl.junit;
 
-import junit.framework.TestCase;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Series;
 import ch.agent.crnickl.api.UpdatableChronicle;
 import ch.agent.crnickl.api.UpdatableSchema;
 import ch.agent.crnickl.api.UpdatableSeries;
-import ch.agent.crnickl.api.UpdatableValueType;
-import ch.agent.crnickl.api.ValueType;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.timeseries.TimeAddressable;
 import ch.agent.t2.timeseries.TimeSeriesFactory;
 
-/*
- *   Copyright 2012 Hauser Olsson GmbH
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * 
- * Package: ch.agent.crnickl.junit
- * Type: T041_UpdatableSeriesTest
- * Version: 1.0.0
- */
-/**
- * T041_UpdatableSeriesTest is a test written when upgrading 2 UpdatableSeries 
- * methods: getFirstObservation and getLastObservation. 
- *
- * @author Jean-Paul Vetterli
- * @version 1.0.0
- */
-public class T041_UpdatableSeriesTest extends TestCase {
+public class T041_UpdatableSeriesTest extends AbstractTest {
 
-	private Database db;
-	private static boolean clean;
-	private static final String SERIES = "bt.test040.test";
+	private static Database db;
+	private static final String SERIES = "bt.t040.test";
 
 	@Override
-	protected void setUp() throws Exception {
+	protected void firstSetUp() throws Exception {
 		db = DBSetUp.getDatabase();
-		if (!clean) {
-	
-			// need a "number" value type
-			if (db.getValueTypes("number").size() == 0) {
-				UpdatableValueType<String> numberType = db.createValueType("number", false, "NUMBER");
-				numberType.applyUpdates();
-				@SuppressWarnings("rawtypes")
-				UpdatableValueType<ValueType> typeType = db.getTypeBuiltInProperty().getValueType().typeCheck(ValueType.class).edit();
-				typeType.addValue(numberType, null);
-				typeType.applyUpdates();
-			}
-			
-			// need a schema
-			UpdatableSchema schema = null;
-			if (db.getSchemas("t040").size() == 0) {
-				schema = db.createSchema("t040", null);
-				schema.addSeries(1);
-				schema.setSeriesName(1, "test");
-				schema.setSeriesType(1, "number");
-				schema.setSeriesTimeDomain(1, Day.DOMAIN);
-				schema.applyUpdates();
-			}
-			
-			// need an entity
-			if (db.getChronicle("bt.test040", false) == null) {
-				UpdatableChronicle ent = db.getTopChronicle().edit().createChronicle("test040", false, "test entity", null, schema);
-				ent.applyUpdates();
-			}
-			
-			for (String name : new String[] { SERIES }) {
-				UpdatableSeries<?> s = db.getUpdatableSeries(name, false);
-				if (s != null) {
-					s.setRange(null);
-					s.applyUpdates();
-					s.destroy();
-					s.applyUpdates();
-				}
-			}
-			db.commit();
-			clean = true;
-		}
+		UpdatableSchema s = db.createSchema("t040", null);
+		s.addSeries(1);
+		s.setSeriesName(1, "test");
+		s.setSeriesType(1, "numeric");
+		s.setSeriesTimeDomain(1, Day.DOMAIN);
+		s.applyUpdates();
+		String split[] = db.getNamingPolicy().split("bt.t040");
+		UpdatableChronicle c = db.getTopChronicle().edit().createChronicle(split[1], false, "test entity", null, s.resolve());
+		c.applyUpdates();
+		db.commit();
+	}
+
+	@Override
+	protected void lastTearDown() throws Exception {
+		Util.deleteChronicles(db, "bt.t040");
+		Util.deleteSchema(db, "t040");
+		db.commit();
 	}
 
 	public void testCreateSeries() {
@@ -225,5 +171,6 @@ public class T041_UpdatableSeriesTest extends TestCase {
 			fail(e.toString());
 		}
 	}
+	
 
 }
