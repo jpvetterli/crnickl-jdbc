@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Attribute;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.Chronicle;
@@ -332,7 +333,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	public <T>ValueType<T> getValueType(String name) throws T2DBException {
 		ValueType<T> vt = getReadMethodsForValueType().getValueType(this, name);
 		if (vt == null)
-			throw T2DBJMsg.exception(J.J10109, name);
+			throw T2DBJMsg.exception(D.D10109, name);
 		return vt;
 	}
 
@@ -422,18 +423,18 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	}
 	
 	@Override
-	public Collection<Surrogate> findChronicles(Schema schema) throws T2DBException {
-		return getWriteMethodsForSchema().findChronicles(schema);
+	public Surrogate findChronicle(Schema schema) throws T2DBException {
+		return getWriteMethodsForSchema().findChronicle(schema);
 	}
 
 	@Override
-	public Collection<Surrogate> findChronicles(Property<?> property, Schema schemas) throws T2DBException {
-		return getWriteMethodsForSchema().findChronicles(property, schemas);
+	public Surrogate findChronicle(Property<?> property, Schema schemas) throws T2DBException {
+		return getWriteMethodsForSchema().findChronicle(property, schemas);
 	}
 
 	@Override
-	public Collection<Surrogate> findChronicles(SeriesDefinition ss, Schema schema) throws T2DBException {
-		return getWriteMethodsForSchema().findChronicles(ss, schema);
+	public Surrogate findChronicle(SeriesDefinition ss, Schema schema) throws T2DBException {
+		return getWriteMethodsForSchema().findChronicle(ss, schema);
 	}
 
 	@Override
