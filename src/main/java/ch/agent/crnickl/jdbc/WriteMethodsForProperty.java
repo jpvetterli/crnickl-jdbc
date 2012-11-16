@@ -23,6 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.ValueType;
@@ -68,7 +69,7 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 			create_property = close(create_property);
 		}
 		if (surrogate == null || cause != null)
-			throw T2DBJMsg.exception(cause, J.J20114, property.getName());
+			throw T2DBJMsg.exception(cause, D.D20114, property.getName());
 		property.getSurrogate().upgrade(surrogate);
 	}
 
@@ -102,7 +103,7 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 			delete_property = close(delete_property);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J20115, property.getName());
+			throw T2DBJMsg.exception(cause, D.D20115, property.getName());
 	}
 	
 	private PreparedStatement update_property;

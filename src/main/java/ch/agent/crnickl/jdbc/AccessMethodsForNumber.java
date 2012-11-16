@@ -25,6 +25,7 @@ import java.sql.SQLException;
 
 import ch.agent.core.KeyedException;
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Series;
 import ch.agent.crnickl.api.UpdatableSeries;
 import ch.agent.crnickl.impl.ChronicleUpdatePolicy;
@@ -68,7 +69,7 @@ public class AccessMethodsForNumber extends JDBCDatabaseMethods implements Value
 					range = null;
 			}
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J50122, series.getName(true));
+			throw T2DBJMsg.exception(e, D.D50122, series.getName(true));
 		} finally {
 			select_range = close(select_range);
 		}
@@ -109,9 +110,9 @@ public class AccessMethodsForNumber extends JDBCDatabaseMethods implements Value
 			}
 		} catch (Exception e) {
 			if (range == null)
-				throw T2DBJMsg.exception(e, J.J50121, series.getName(true));
+				throw T2DBJMsg.exception(e, D.D50121, series.getName(true));
 			else
-				throw T2DBJMsg.exception(e, J.J50120, series.getName(true), range.toString());
+				throw T2DBJMsg.exception(e, D.D50120, series.getName(true), range.toString());
 		} finally {
 			select_double = close(select_double);
 			select_double_by_range = close(select_double_by_range);
@@ -152,7 +153,7 @@ public class AccessMethodsForNumber extends JDBCDatabaseMethods implements Value
 				obs = new Observation<Double>(t, rs.getDouble(2));
 			}
 		} catch (Exception e) {
-				throw T2DBJMsg.exception(e, J.J50123, series.getName(true), time.toString());
+				throw T2DBJMsg.exception(e, D.D50123, series.getName(true), time.toString());
 		} finally {
 			select_first_double1 = close(select_first_double1);
 			select_first_double2 = close(select_first_double2);
@@ -193,7 +194,7 @@ public class AccessMethodsForNumber extends JDBCDatabaseMethods implements Value
 				obs = new Observation<Double>(t, rs.getDouble(2));
 			}
 		} catch (Exception e) {
-				throw T2DBJMsg.exception(e, J.J50124, series.getName(true), time.toString());
+				throw T2DBJMsg.exception(e, D.D50124, series.getName(true), time.toString());
 		} finally {
 			select_last_double1 = close(select_last_double1);
 			select_last_double2 = close(select_last_double2);
@@ -267,7 +268,7 @@ public class AccessMethodsForNumber extends JDBCDatabaseMethods implements Value
 	 * @return true if something done
 	 * @throws T2DBException
 	 */
-	public boolean insertOrUpdateValue(UpdatableSeries<Double> series, Observation<Double> obs, ChronicleUpdatePolicy policy) throws T2DBException {
+	protected boolean insertOrUpdateValue(UpdatableSeries<Double> series, Observation<Double> obs, ChronicleUpdatePolicy policy) throws T2DBException {
 		boolean done = false;
 		Double v = obs.getValue();
 		if (v == null || Double.isNaN(v))

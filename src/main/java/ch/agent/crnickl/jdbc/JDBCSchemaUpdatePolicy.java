@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.SchemaUpdatePolicyImpl;
@@ -22,29 +23,25 @@ public class JDBCSchemaUpdatePolicy extends SchemaUpdatePolicyImpl {
 	@Override
 	public <T> void willDelete(Property<T> property) throws T2DBException {
 		super.willDelete(property);
-		int count = countProperties(property);
-		if (count > 0)
-			throw T2DBJMsg.exception(J.J20119, property.getName(), count);
+		if (countProperties(property) > 0)
+			throw T2DBJMsg.exception(D.D20119, property.getName());
 	}
 
 	@Override
 	public <T> void willDelete(ValueType<T> valueType) throws T2DBException {
 		super.willDelete(valueType);
-		int count = countProperties(valueType);
-		if (count > 0)
-			throw T2DBJMsg.exception(J.J10119, valueType.getName(), count);
+		if (countProperties(valueType) > 0)
+			throw T2DBJMsg.exception(D.D10149, valueType.getName());
 	}
 
 	@Override
 	public <T> void willDelete(ValueType<T> vt, T value)	throws T2DBException {
 		super.willDelete(vt, value);
 		String name = vt.getName();
-		int count = countDefaultValues(vt, vt.toString(value));
-		if (count > 0)
-			throw T2DBJMsg.exception(J.J10127, name, value, count);
-		count = countActualValues(vt, vt.toString(value));
-		if (count > 0)
-			throw T2DBJMsg.exception(J.J10128, name, value, count);
+		if (countDefaultValues(vt, vt.toString(value)) > 0)
+			throw T2DBJMsg.exception(D.D10157, name, value);
+		if (countActualValues(vt, vt.toString(value)) > 0)
+			throw T2DBJMsg.exception(D.D10158, name, value);
 	}
 
 	private PreparedStatement count_default_values;

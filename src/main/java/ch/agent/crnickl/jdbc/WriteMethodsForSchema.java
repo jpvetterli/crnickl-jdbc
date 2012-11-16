@@ -21,8 +21,6 @@ package ch.agent.crnickl.jdbc;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import ch.agent.crnickl.T2DBException;
 import ch.agent.crnickl.api.AttributeDefinition;
@@ -395,22 +393,23 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	private PreparedStatement find_entity_with_schema;
 	private static final String FIND_ENTITY_WITH_SCHEMA = "select id from " + DB.CHRONICLE + " where schema_id = ?";
 	/**
-	 * Find all chronicles referencing the schema. 
+	 * Find a chronicle referencing the schema. 
 	 * This looks like a "reading" method but is used in the context of schema updating.
 	 * 
 	 * @param schema a schema
-	 * @return a collection of chronicle surrogates
+	 * @return a chronicle surrogate or null
 	 * @throws T2DBException
 	 */
-	public Collection<Surrogate> findChronicles(Schema schema) throws T2DBException {
-		Collection<Surrogate> result = new ArrayList<Surrogate>();
+	public Surrogate findChronicle(Schema schema) throws T2DBException {
+		Surrogate result = null;
 		Database database = schema.getSurrogate().getDatabase();
 		try {
 			find_entity_with_schema = open(FIND_ENTITY_WITH_SCHEMA, database, find_entity_with_schema);
 			find_entity_with_schema.setInt(1, getId(schema));
 			ResultSet rs = find_entity_with_schema.executeQuery();
 			while (rs.next()) {
-				result.add(makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1)));
+				result = makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1));
+				break;
 			}
 		} catch (Exception e) {
 			throw T2DBJMsg.exception(e, J.J30117);
@@ -423,16 +422,16 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	private PreparedStatement find_entity_with_property;
 	private static final String FIND_ENTITY_WITH_PROPERTY = "select chronicle from " + DB.ATTRIBUTE_VALUE + " where prop = ?";
 	/**
-	 * Find all chronicles with an explicit attribute value for a given property and schema. 
+	 * Find a chronicle with an explicit attribute value for a given property and schema. 
 	 * This looks like a "reading" method but is used in the context of schema updating.
 	 * 
 	 * @param property a property
 	 * @param schema a schema
-	 * @return a collection of chronicle surrogates
+	 * @return a surrogate or null
 	 * @throws T2DBException
 	 */
-	public Collection<Surrogate> findChronicles(Property<?> property, Schema schema) throws T2DBException {
-		Collection<Surrogate> result = new ArrayList<Surrogate>();
+	public Surrogate findChronicle(Property<?> property, Schema schema) throws T2DBException {
+		Surrogate result = null;
 		Database database = property.getSurrogate().getDatabase();
 		try {
 			find_entity_with_property = open(FIND_ENTITY_WITH_PROPERTY, property, find_entity_with_property);
@@ -441,8 +440,10 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			while(rs.next()) {
 				Surrogate entityKey = makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1));
 				Schema s = database.getChronicle(entityKey).getSchema(true);
-				if (s.dependsOnSchema(schema))
-					result.add(entityKey);
+				if (s.dependsOnSchema(schema)) {
+					result = entityKey;
+					break;
+				}
 			}
 		} catch (Exception e) {
 			throw T2DBJMsg.exception(e, J.J30117);
@@ -455,16 +456,16 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	private PreparedStatement find_entity_with_series;
 	private static final String FIND_ENTITY_WITH_SERIES = "select chronicle from " + DB.SERIES + " where ssn = ?";
 	/**
-	 * Find all chronicles with actual series depending from a given schema.
+	 * Find a chronicle depending one a given series in a schema.
 	 * This looks like a "reading" method but is used in the context of schema updating.
 	 * 
 	 * @param ss a series definition
 	 * @param schemas a schema
-	 * @return a collection of chronicle surrogates
+	 * @return a surrogate or null
 	 * @throws T2DBException
 	 */
-	public Collection<Surrogate> findChronicles(SeriesDefinition ss, Schema schema) throws T2DBException {
-		Collection<Surrogate> result = new ArrayList<Surrogate>();
+	public Surrogate findChronicle(SeriesDefinition ss, Schema schema) throws T2DBException {
+		Surrogate result = null;
 		Database database = schema.getSurrogate().getDatabase();
 		try {
 			find_entity_with_series = open(FIND_ENTITY_WITH_SERIES, database, find_entity_with_series);
@@ -473,8 +474,10 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			while (rs.next()) {
 				Surrogate entityKey = makeSurrogate(database, DBObjectType.CHRONICLE, rs.getInt(1));
 				Schema s = database.getChronicle(entityKey).getSchema(true);
-				if (s.dependsOnSchema(schema))
-					result.add(entityKey);
+				if (s.dependsOnSchema(schema)) {
+					result = entityKey;
+					break;
+				}
 			}
 		} catch (Exception e) {
 			throw T2DBJMsg.exception(e, J.J30117);

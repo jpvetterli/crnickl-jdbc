@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.Permission;
@@ -106,7 +107,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			delete_valuetype = close(delete_valuetype);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J10115, vt.getName());
+			throw T2DBJMsg.exception(cause, D.D10145, vt.getName());
 	}
 	
 	private PreparedStatement update_valuetype;
@@ -142,7 +143,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			update_valuetype = close(update_valuetype);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J10116, vt.getName());
+			throw T2DBJMsg.exception(cause, D.D10146, vt.getName());
 	}
 	
 	private <T>boolean updateValues(ValueType<T> original, ValueType<T> vt, SchemaUpdatePolicy policy) throws T2DBException {

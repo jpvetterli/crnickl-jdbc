@@ -91,7 +91,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			cause = null;
+			cause = e;
 		} finally {
 			select_entity_by_id = close(select_entity_by_id);
 		}
