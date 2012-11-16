@@ -52,27 +52,18 @@ public class T2DBJMsg extends KeyedMessage {
 		public static final String J10105 = "J10105";
 		public static final String J10106 = "J10106";
 		public static final String J10107 = "J10107";
-		public static final String J10109 = "J10109"; 
 		public static final String J10110 = "J10110"; 
 		public static final String J10114 = "J10114"; 
-		public static final String J10115 = "J10115"; 
-		public static final String J10116 = "J10116"; 
-		public static final String J10119 = "J10119"; 
 		public static final String J10121 = "J10121"; 
 		public static final String J10122 = "J10122"; 
 		public static final String J10126 = "J10126"; 
-		public static final String J10127 = "J10127"; 
-		public static final String J10128 = "J10128"; 
 
 		public static final String J20104 = "J20104"; 
 		public static final String J20105 = "J20105"; 
 		public static final String J20106 = "J20106"; 
 		public static final String J20107 = "J20107"; 
 		public static final String J20109 = "J20109"; 
-		public static final String J20114 = "J20114"; 
-		public static final String J20115 = "J20115"; 
 		public static final String J20116 = "J20116";
-		public static final String J20119 = "J20119"; 
 		public static final String J20120 = "J20120"; 
 		
 		public static final String J30104 = "J30104"; 
@@ -113,12 +104,6 @@ public class T2DBJMsg extends KeyedMessage {
 		public static final String J50112 = "J50112"; 
 		public static final String J50113 = "J50113"; 
 		public static final String J50119 = "J50119"; 
-		public static final String J50120 = "J50120"; 
-		public static final String J50121 = "J50121"; 
-		public static final String J50122 = "J50122"; 
-		public static final String J50123 = "J50123"; 
-		public static final String J50124 = "J50124"; 
-		
 	}
 	
 	private static final String BUNDLE_NAME = ch.agent.crnickl.jdbc.T2DBJMsg.class.getName();
