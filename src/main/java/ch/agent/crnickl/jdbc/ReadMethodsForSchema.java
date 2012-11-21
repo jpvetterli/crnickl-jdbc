@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
@@ -39,7 +41,6 @@ import ch.agent.crnickl.impl.AttributeDefinitionImpl;
 import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.SeriesDefinitionImpl;
 import ch.agent.crnickl.impl.UpdatableSchemaImpl;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * A stateless object with methods providing read access to schemas.
@@ -189,7 +190,7 @@ public class ReadMethodsForSchema extends JDBCDatabaseMethods {
 			}
 			return result;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J30105, pattern);
+			throw T2DBMsg.exception(e, E.E30105, pattern);
 		} finally {
 			select_schema_by_pattern = close(select_schema_by_pattern);
 		}
@@ -215,7 +216,7 @@ public class ReadMethodsForSchema extends JDBCDatabaseMethods {
 			else
 				return null;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J30104, surrogate.toString());
+			throw T2DBMsg.exception(e, E.E30104, surrogate.toString());
 		} finally {
 			select_schema_by_id = close(select_schema_by_id);
 		}
@@ -237,7 +238,7 @@ public class ReadMethodsForSchema extends JDBCDatabaseMethods {
 			}
 			return getRawSchemaComponents(result);
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J30114, surrogate.toString());
+			throw T2DBMsg.exception(e, E.E30114, surrogate.toString());
 		} finally {
 			select_schema_components = close(select_schema_components);
 		}
@@ -336,7 +337,7 @@ public class ReadMethodsForSchema extends JDBCDatabaseMethods {
 			Surrogate parentKey = makeSurrogate(database, DBObjectType.SCHEMA, rawSchema.getParent());
 			RawSchema rawBaseSchema = getRawSchema(parentKey);
 			if (rawBaseSchema == null)
-				throw T2DBJMsg.exception(J.J30116, rawSchema.getParent(), name);
+				throw T2DBMsg.exception(E.E30116, rawSchema.getParent(), name);
 			base = getSchema(database, rawBaseSchema, cycleDetector);
 		}
 		Surrogate surrogate = makeSurrogate(database, DBObjectType.SCHEMA, rawSchema.getId());

@@ -23,6 +23,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.Schema;
@@ -33,7 +35,6 @@ import ch.agent.crnickl.api.UpdatableSeries;
 import ch.agent.crnickl.impl.ChronicleUpdatePolicy;
 import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.Permission;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * A stateless object with methods providing write access to chronicles and
@@ -87,7 +88,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			create_entity = close(create_entity);
 		}
 		if (surrogate == null || cause != null)
-			throw T2DBJMsg.exception(cause, J.J40109, chronicle.getName(true));
+			throw T2DBMsg.exception(cause, E.E40109, chronicle.getName(true));
 		chronicle.getSurrogate().upgrade(surrogate);
 	}
 	
@@ -132,7 +133,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			delete_entity_attributes = close(delete_entity_attributes);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J40110, chronicle.getName(true));
+			throw T2DBMsg.exception(cause, E.E40110, chronicle.getName(true));
 	}
 	
 	private PreparedStatement update_entity;
@@ -173,7 +174,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			update_entity = close(update_entity);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J40111, chronicle.getName(true));
+			throw T2DBMsg.exception(cause, E.E40111, chronicle.getName(true));
 	}
 	
 	private PreparedStatement insert_attribute;
@@ -207,7 +208,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			insert_attribute = close(insert_attribute);
 		}
 		if (!done)
-			throw T2DBJMsg.exception(J.J40112, chronicle.getName(true), def.getNumber());
+			throw T2DBMsg.exception(E.E40112, chronicle.getName(true), def.getNumber());
 	}
 	
 	private PreparedStatement update_attribute;
@@ -225,7 +226,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			update_attribute.execute();
 			done = update_attribute.getUpdateCount() > 0;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(originalException, J.J40113, entity.getName(true), def.getNumber());
+			throw T2DBMsg.exception(originalException, E.E40113, entity.getName(true), def.getNumber());
 		} finally {
 			update_attribute = close(update_attribute);
 		}
@@ -259,7 +260,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			delete_attribute = close(delete_attribute);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J40114, chronicle.getName(true), def.getNumber());
+			throw T2DBMsg.exception(cause, E.E40114, chronicle.getName(true), def.getNumber());
 	}
 
 	private PreparedStatement create_series;
@@ -290,7 +291,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			create_series = close(create_series);
 		}
 		if (surrogate == null || cause != null)
-			throw T2DBJMsg.exception(cause, J.J50111, series.getName(true));
+			throw T2DBMsg.exception(cause, E.E50111, series.getName(true));
 		series.getSurrogate().upgrade(surrogate);
 	}
 	
@@ -326,7 +327,7 @@ public class WriteMethodsForChroniclesAndSeries extends	ReadMethodsForChronicles
 			delete_series = close(delete_series);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J50112, series.getName(true));
+			throw T2DBMsg.exception(cause, E.E50112, series.getName(true));
 	}
 
 }

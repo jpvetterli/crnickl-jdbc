@@ -5,11 +5,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import ch.agent.crnickl.T2DBException;
-import ch.agent.crnickl.T2DBMsg.D;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.SchemaUpdatePolicyImpl;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 public class JDBCSchemaUpdatePolicy extends SchemaUpdatePolicyImpl {
 
@@ -24,14 +24,14 @@ public class JDBCSchemaUpdatePolicy extends SchemaUpdatePolicyImpl {
 	public <T> void willDelete(Property<T> property) throws T2DBException {
 		super.willDelete(property);
 		if (countProperties(property) > 0)
-			throw T2DBJMsg.exception(D.D20119, property.getName());
+			throw T2DBMsg.exception(E.E20119, property.getName());
 	}
 
 	@Override
 	public <T> void willDelete(ValueType<T> valueType) throws T2DBException {
 		super.willDelete(valueType);
 		if (countProperties(valueType) > 0)
-			throw T2DBJMsg.exception(D.D10149, valueType.getName());
+			throw T2DBMsg.exception(E.E10149, valueType.getName());
 	}
 
 	@Override
@@ -39,9 +39,9 @@ public class JDBCSchemaUpdatePolicy extends SchemaUpdatePolicyImpl {
 		super.willDelete(vt, value);
 		String name = vt.getName();
 		if (countDefaultValues(vt, vt.toString(value)) > 0)
-			throw T2DBJMsg.exception(D.D10157, name, value);
+			throw T2DBMsg.exception(E.E10157, name, value);
 		if (countActualValues(vt, vt.toString(value)) > 0)
-			throw T2DBJMsg.exception(D.D10158, name, value);
+			throw T2DBMsg.exception(E.E10158, name, value);
 	}
 
 	private PreparedStatement count_default_values;
@@ -57,7 +57,7 @@ public class JDBCSchemaUpdatePolicy extends SchemaUpdatePolicyImpl {
 			rs.next();
 			return rs.getInt(1);
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J10107, vt.getName());
+			throw T2DBMsg.exception(e, E.E10107, vt.getName());
 		} finally {
 			count_default_values = methods.close(count_default_values);
 		}
@@ -76,7 +76,7 @@ public class JDBCSchemaUpdatePolicy extends SchemaUpdatePolicyImpl {
 			rs.next();
 			return rs.getInt(1);
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J10107, vt.getName());
+			throw T2DBMsg.exception(e, E.E10107, vt.getName());
 		} finally {
 			count_actual_values = methods.close(count_actual_values);
 		}
@@ -93,7 +93,7 @@ public class JDBCSchemaUpdatePolicy extends SchemaUpdatePolicyImpl {
 			rs.next();
 			return rs.getInt(1);
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J10107, vt.getName());
+			throw T2DBMsg.exception(e, E.E10107, vt.getName());
 		} finally {
 			count_property = methods.close(count_property);
 		}
@@ -110,7 +110,7 @@ public class JDBCSchemaUpdatePolicy extends SchemaUpdatePolicyImpl {
 			rs.next();
 			return rs.getInt(1);
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J20107, property.getName());
+			throw T2DBMsg.exception(e, E.E20107, property.getName());
 		} finally {
 			count_slot = methods.close(count_slot);
 		}

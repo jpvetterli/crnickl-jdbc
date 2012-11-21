@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.logging.Level;
 
 import ch.agent.crnickl.T2DBException;
-import ch.agent.crnickl.T2DBMsg.D;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.Attribute;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.Chronicle;
@@ -233,7 +234,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 		checkSurrogate(surrogate, DBObjectType.SERIES);
 		Series<T> series = getReadMethodsForChronicleAndSeries().getSeries(surrogate);
 		if (series == null)
-			throw T2DBJMsg.exception(J.J50104, surrogate.toString());
+			throw T2DBMsg.exception(E.E50104, surrogate.toString());
 		return series;
 
 	}
@@ -272,7 +273,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 		checkSurrogate(surrogate, DBObjectType.PROPERTY);
 		Property<?> vt = getReadMethodsForProperty().getProperty(surrogate);
 		if (vt == null)
-			throw T2DBJMsg.exception(J.J20109, surrogate.toString());
+			throw T2DBMsg.exception(E.E20109, surrogate.toString());
 		return vt;
 	}
 
@@ -333,7 +334,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	public <T>ValueType<T> getValueType(String name) throws T2DBException {
 		ValueType<T> vt = getReadMethodsForValueType().getValueType(this, name);
 		if (vt == null)
-			throw T2DBJMsg.exception(D.D10109, name);
+			throw T2DBMsg.exception(E.E10109, name);
 		return vt;
 	}
 
@@ -342,7 +343,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 		checkSurrogate(surrogate, DBObjectType.VALUE_TYPE);
 		ValueType<T> vt = getReadMethodsForValueType().getValueType(surrogate);
 		if (vt == null)
-			throw T2DBJMsg.exception(J.J10110, surrogate.toString());
+			throw T2DBMsg.exception(E.E10110, surrogate.toString());
 		return vt;
 	}
 
@@ -399,7 +400,7 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	public UpdatableSchema getUpdatableSchema(Surrogate surrogate) throws T2DBException {
 		UpdatableSchema schema = getReadMethodsForSchema().getSchema(surrogate);
 		if (schema == null)
-			throw T2DBJMsg.exception(J.J30109, surrogate.toString());
+			throw T2DBMsg.exception(E.E30109, surrogate.toString());
 		return schema;
 	}
 

@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.Attribute;
 import ch.agent.crnickl.api.Chronicle;
 import ch.agent.crnickl.api.DBObject;
@@ -41,7 +43,6 @@ import ch.agent.crnickl.impl.ChronicleImpl;
 import ch.agent.crnickl.impl.ChronicleImpl.RawData;
 import ch.agent.crnickl.impl.Permission;
 import ch.agent.crnickl.impl.SeriesImpl;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * A stateless object with methods providing read access to chronicles and
@@ -96,7 +97,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			select_entity_by_id = close(select_entity_by_id);
 		}
 		if (chronicle == null || cause != null)
-			throw T2DBJMsg.exception(cause, J.J40104, surrogate.toString());
+			throw T2DBMsg.exception(cause, E.E40104, surrogate.toString());
 		return chronicle;
 	}
 	
@@ -121,7 +122,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			if (rs.next()) {
 				int id = rs.getInt(1);
 				if (id == 0)
-					throw T2DBJMsg.exception(J.J40105, parent == null ? null : parent.toString(), name);
+					throw T2DBMsg.exception(E.E40105, parent == null ? null : parent.toString(), name);
 				Surrogate surrogate = makeSurrogate(parent.getSurrogate().getDatabase(), DBObjectType.CHRONICLE, id);
 				ChronicleImpl.RawData data = new ChronicleImpl.RawData();
 				data.setSurrogate(surrogate);
@@ -137,7 +138,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J40123, name, parent.getName(true));
+			throw T2DBMsg.exception(e, E.E40123, name, parent.getName(true));
 		} finally {
 			select_entity_by_parent_and_name = close(select_entity_by_parent_and_name);
 		}
@@ -164,7 +165,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 				while (rs.next()) {
 					int id = rs.getInt(1);
 					if (id == 0)
-						throw T2DBJMsg.exception(J.J40105, parent == null ? null : parent.toString(), rs.getString(3));
+						throw T2DBMsg.exception(E.E40105, parent == null ? null : parent.toString(), rs.getString(3));
 					Surrogate surrogate = makeSurrogate(database, DBObjectType.CHRONICLE, id);
 					RawData data = new ChronicleImpl.RawData();
 					data.setSurrogate(surrogate);
@@ -179,7 +180,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 				}
 				rs.close();
 			} catch (SQLException e) {
-				throw T2DBJMsg.exception(e, J.J40122, parent.getName(true));
+				throw T2DBMsg.exception(e, E.E40122, parent.getName(true));
 			} finally {
 				select_entities_by_parent = close(select_entities_by_parent);
 			}
@@ -240,7 +241,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			while(rs.next()) {
 				int name = rs.getInt(1);
 				if (name == 0)
-					throw T2DBJMsg.exception(J.J40106, sql);
+					throw T2DBMsg.exception(E.E40106, sql);
 				if (found == 0 || moreSpecific(ids, name, found)) {
 					found = name;
 					attribute.scan(rs.getString(2));
@@ -251,7 +252,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J40120, attribute.getProperty().getName());
+			throw T2DBMsg.exception(e, E.E40120, attribute.getProperty().getName());
 		} finally {
 			if (size > MAX_ENTITY_DEPTH)
 				sel_attibute_prop_in_ent[0] = close(sel_attibute_prop_in_ent[0]);
@@ -291,7 +292,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			}
 			rs.close();
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J40119, property.getName(), value);
+			throw T2DBMsg.exception(e, E.E40119, property.getName(), value);
 		} finally {
 			sel_entities_by_attribute = close(sel_entities_by_attribute);
 		}
@@ -354,7 +355,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			} else
 				return null;
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J50119, surrogate.toString());
+			throw T2DBMsg.exception(e, E.E50119, surrogate.toString());
 		} finally {
 			select_series_by_id = close(select_series_by_id);
 		}
@@ -421,7 +422,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 				break;
 			}
 		} catch (SQLException e) {
-			throw T2DBJMsg.exception(e, J.J40121, chronicle.getName(true));
+			throw T2DBMsg.exception(e, E.E40121, chronicle.getName(true));
 		} finally {
 			select_series_by_entity_and_nr = close(select_series_by_entity_and_nr);
 			select_series_by_entity = close(select_series_by_entity);

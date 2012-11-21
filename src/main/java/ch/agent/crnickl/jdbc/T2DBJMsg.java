@@ -31,7 +31,7 @@ import ch.agent.core.MessageBundle;
  * @version 1.0.0
  */
 public class T2DBJMsg extends KeyedMessage {
-
+	
 	/**
 	 * Message symbols.
 	 */
@@ -43,67 +43,8 @@ public class T2DBJMsg extends KeyedMessage {
 		public static final String J00106 = "J00106"; 
 		public static final String J00107 = "J00107"; 
 		public static final String J00108 = "J00108"; 
-		public static final String J00110 = "J00110"; 
 		public static final String J00111 = "J00111"; 
-		
 		public static final String J01101 = "J01101";
-		
-		public static final String J10104 = "J10104";
-		public static final String J10105 = "J10105";
-		public static final String J10106 = "J10106";
-		public static final String J10107 = "J10107";
-		public static final String J10110 = "J10110"; 
-		public static final String J10114 = "J10114"; 
-		public static final String J10121 = "J10121"; 
-		public static final String J10122 = "J10122"; 
-		public static final String J10126 = "J10126"; 
-
-		public static final String J20104 = "J20104"; 
-		public static final String J20105 = "J20105"; 
-		public static final String J20106 = "J20106"; 
-		public static final String J20107 = "J20107"; 
-		public static final String J20109 = "J20109"; 
-		public static final String J20116 = "J20116";
-		public static final String J20120 = "J20120"; 
-		
-		public static final String J30104 = "J30104"; 
-		public static final String J30105 = "J30105"; 
-		public static final String J30109 = "J30109"; 
-		public static final String J30114 = "J30114"; 
-		public static final String J30116 = "J30116"; 
-		public static final String J30117 = "J30117";
-		public static final String J30122 = "J30122";
-		public static final String J30123 = "J30123";
-		public static final String J30124 = "J30124";
-		public static final String J30125 = "J30125";
-		public static final String J30126 = "J30126";
-		public static final String J30127 = "J30127";
-		public static final String J30128 = "J30128";
-		public static final String J30129 = "J30129";
-		public static final String J30130 = "J30130";
-
-		public static final String J40104 = "J40104"; 
-		public static final String J40105 = "J40105"; 
-		public static final String J40106 = "J40106"; 
-		public static final String J40109 = "J40109"; 
-		public static final String J40110 = "J40110"; 
-		public static final String J40111 = "J40111"; 
-		public static final String J40112 = "J40112"; 
-		public static final String J40113 = "J40113"; 
-		public static final String J40114 = "J40114"; 
-		public static final String J40119 = "J40119"; 
-		public static final String J40120 = "J40120"; 
-		public static final String J40121 = "J40121"; 
-		public static final String J40122 = "J40122"; 
-		public static final String J40123 = "J40123"; 
-		
-		public static final String J50104 = "J50104"; 
-		public static final String J50109 = "J50109"; 
-		public static final String J50110 = "J50110"; 
-		public static final String J50111 = "J50111"; 
-		public static final String J50112 = "J50112"; 
-		public static final String J50113 = "J50113"; 
-		public static final String J50119 = "J50119"; 
 	}
 	
 	private static final String BUNDLE_NAME = ch.agent.crnickl.jdbc.T2DBJMsg.class.getName();

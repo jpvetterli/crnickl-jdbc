@@ -27,13 +27,13 @@ import java.util.Map;
 import java.util.Set;
 
 import ch.agent.crnickl.T2DBException;
-import ch.agent.crnickl.T2DBMsg.D;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.Permission;
 import ch.agent.crnickl.impl.SchemaUpdatePolicy;
 import ch.agent.crnickl.impl.ValueTypeImpl;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * A stateless object with methods providing write access to value types.
@@ -75,7 +75,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			create_valuetype = close(create_valuetype);
 		}
 		if (surrogate == null || cause != null)
-			throw T2DBJMsg.exception(cause, J.J10114, vt.getName());
+			throw T2DBMsg.exception(cause, E.E10114, vt.getName());
 	}
 
 	private PreparedStatement delete_valuetype;
@@ -107,7 +107,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			delete_valuetype = close(delete_valuetype);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, D.D10145, vt.getName());
+			throw T2DBMsg.exception(cause, E.E10145, vt.getName());
 	}
 	
 	private PreparedStatement update_valuetype;
@@ -143,7 +143,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			update_valuetype = close(update_valuetype);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, D.D10146, vt.getName());
+			throw T2DBMsg.exception(cause, E.E10146, vt.getName());
 	}
 	
 	private <T>boolean updateValues(ValueType<T> original, ValueType<T> vt, SchemaUpdatePolicy policy) throws T2DBException {
@@ -244,7 +244,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			insert_valuelist = close(insert_valuelist);
 		}
 		if (!done || cause != null) {
-			throw T2DBJMsg.exception(cause, J.J10121, vt.getName());
+			throw T2DBMsg.exception(cause, E.E10121, vt.getName());
 		}
 	}
 	
@@ -267,7 +267,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			update_valuelist = close(update_valuelist);
 		}
 		if (!done || cause != null) {
-			throw T2DBJMsg.exception(cause, J.J10122, vt.getName());
+			throw T2DBMsg.exception(cause, E.E10122, vt.getName());
 		}
 	}
 
@@ -305,7 +305,7 @@ public class WriteMethodsForValueType extends JDBCDatabaseMethods {
 			delete_valuelist = close(delete_valuelist);
 		}
 		if (!done|| cause != null)
-			throw T2DBJMsg.exception(cause, J.J10126, name, value);
+			throw T2DBMsg.exception(cause, E.E10126, name, value);
 	}
 
 	private PreparedStatement delete_values;

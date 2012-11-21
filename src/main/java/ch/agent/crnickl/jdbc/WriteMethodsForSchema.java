@@ -23,6 +23,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
@@ -36,7 +38,6 @@ import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.Permission;
 import ch.agent.crnickl.impl.UpdatableSchemaImpl;
 import ch.agent.crnickl.impl.UpdatableSchemaVisitor;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * A stateless object with methods providing write access to schemas.
@@ -141,7 +142,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			create_schema = close(create_schema);
 		}
 		if (surrogate == null || cause != null)
-			throw T2DBJMsg.exception(cause, J.J30122, schema.getName());
+			throw T2DBMsg.exception(cause, E.E30122, schema.getName());
 	}
 	
 	private PreparedStatement delete_schema;
@@ -175,7 +176,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			delete_schema = close(delete_schema);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J30123, schema.getName());
+			throw T2DBMsg.exception(cause, E.E30123, schema.getName());
 	}
 
 	private PreparedStatement create_schema_component;
@@ -209,7 +210,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 				Property<?> prop = ((JDBCDatabase)database).getReadMethodsForProperty().
 						getProperty(def.getProperty().getSurrogate());
 				if (prop == null)
-					throw T2DBJMsg.exception(J.J30130);
+					throw T2DBMsg.exception(E.E30130);
 				create_schema_component.setInt(4, getId(prop));
 				String value = def.getProperty().getValueType().toString(def.getValue());
 				create_schema_component.setString(5, value == null ? "" : value);
@@ -220,9 +221,9 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 		} catch (Exception e) {
 			if (!done) {
 				if (seriesNr == 0)
-					throw T2DBJMsg.exception(e, J.J30124, def.getNumber());
+					throw T2DBMsg.exception(e, E.E30124, def.getNumber());
 				else
-					throw T2DBJMsg.exception(e, J.J30125, def.getNumber(), seriesNr);
+					throw T2DBMsg.exception(e, E.E30125, def.getNumber(), seriesNr);
 			}
 		} finally {
 			create_schema_component = close(create_schema_component);
@@ -270,7 +271,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			cause = e;
 		} 
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J30126, schema);
+			throw T2DBMsg.exception(cause, E.E30126, schema);
 		return done;
 	}
 	
@@ -308,7 +309,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			delete_schema_by_attribute = close(delete_schema_by_attribute);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J30128, schema, seriesNr, attribNr);
+			throw T2DBMsg.exception(cause, E.E30128, schema, seriesNr, attribNr);
 	}
 	
 	private PreparedStatement delete_schema_by_series;
@@ -339,7 +340,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			delete_schema_by_series = close(delete_schema_by_series);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J30129, schema, seriesNr);
+			throw T2DBMsg.exception(cause, E.E30129, schema, seriesNr);
 	}
 	
 	private PreparedStatement update_schema_by_attribute;
@@ -376,7 +377,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 			update_schema_by_attribute = close(update_schema_by_attribute);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J30127, schema, seriesNr, def.getNumber());
+			throw T2DBMsg.exception(cause, E.E30127, schema, seriesNr, def.getNumber());
 	}
 	
 	private boolean nameEdited(UpdatableSchema schema, RawSchema current) {
@@ -412,7 +413,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 				break;
 			}
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J30117);
+			throw T2DBMsg.exception(e, E.E30117);
 		} finally {
 			find_entity_with_schema = close(find_entity_with_schema);
 		}
@@ -446,7 +447,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 				}
 			}
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J30117);
+			throw T2DBMsg.exception(e, E.E30117);
 		} finally {
 			find_entity_with_property = close(find_entity_with_property);
 		}
@@ -480,7 +481,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 				}
 			}
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J30117);
+			throw T2DBMsg.exception(e, E.E30117);
 		} finally {
 			find_entity_with_series = close(find_entity_with_series);
 		}

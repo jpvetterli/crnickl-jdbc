@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Property;
@@ -67,7 +69,7 @@ public class ReadMethodsForProperty extends JDBCDatabaseMethods {
 			} else
 				return null;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J20104, name);
+			throw T2DBMsg.exception(e, E.E20104, name);
 		} finally {
 			select_property_by_name = close(select_property_by_name);
 		}
@@ -98,7 +100,7 @@ public class ReadMethodsForProperty extends JDBCDatabaseMethods {
 			}
 			return result;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J20106, pattern);
+			throw T2DBMsg.exception(e, E.E20106, pattern);
 		} finally {
 			select_property_by_pattern = close(select_property_by_pattern);
 		}
@@ -124,7 +126,7 @@ public class ReadMethodsForProperty extends JDBCDatabaseMethods {
 			else
 				return null;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J20105, surrogate.toString());
+			throw T2DBMsg.exception(e, E.E20105, surrogate.toString());
 		} finally {
 			select_property_by_id = close(select_property_by_id);
 		}

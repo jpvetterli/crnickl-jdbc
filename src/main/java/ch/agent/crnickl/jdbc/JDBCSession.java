@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.DatabaseConfiguration;
 import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
@@ -130,7 +132,7 @@ public class JDBCSession {
 			connection = null;
 		} catch (Exception e) {
 			if (!ignoreException)
-				throw T2DBJMsg.exception(J.J00110, toString());
+				throw T2DBMsg.exception(E.E00110, toString());
 		}
 	}
 

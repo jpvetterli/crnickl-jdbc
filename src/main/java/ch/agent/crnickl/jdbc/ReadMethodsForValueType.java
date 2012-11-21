@@ -28,12 +28,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import ch.agent.crnickl.T2DBException;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.ValueTypeImpl;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * A stateless object with methods providing read access to value types.
@@ -69,7 +70,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 			} else
 				return null;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J10104, name);
+			throw T2DBMsg.exception(e, E.E10104, name);
 		} finally {
 			select_valuetype_by_name = close(select_valuetype_by_name);
 		}
@@ -102,7 +103,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 			}
 			return result;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J10106, pattern);
+			throw T2DBMsg.exception(e, E.E10106, pattern);
 		} finally {
 			select_valuetype_by_pattern = close(select_valuetype_by_pattern);
 		}
@@ -129,7 +130,7 @@ public class ReadMethodsForValueType extends JDBCDatabaseMethods {
 			else
 				return null;
 		} catch (Exception e) {
-			throw T2DBJMsg.exception(e, J.J10105, surrogate.toString());
+			throw T2DBMsg.exception(e, E.E10105, surrogate.toString());
 		} finally {
 			select_valuetype_by_id = close(select_valuetype_by_id);
 		}

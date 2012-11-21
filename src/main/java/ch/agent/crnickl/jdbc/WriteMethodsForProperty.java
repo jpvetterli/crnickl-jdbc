@@ -23,14 +23,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import ch.agent.crnickl.T2DBException;
-import ch.agent.crnickl.T2DBMsg.D;
+import ch.agent.crnickl.T2DBMsg;
+import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.Property;
 import ch.agent.crnickl.api.Surrogate;
 import ch.agent.crnickl.api.ValueType;
 import ch.agent.crnickl.impl.DatabaseBackend;
 import ch.agent.crnickl.impl.Permission;
 import ch.agent.crnickl.impl.SchemaUpdatePolicy;
-import ch.agent.crnickl.jdbc.T2DBJMsg.J;
 
 /**
  * A stateless object with methods providing write access to properties.
@@ -69,7 +69,7 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 			create_property = close(create_property);
 		}
 		if (surrogate == null || cause != null)
-			throw T2DBJMsg.exception(cause, D.D20114, property.getName());
+			throw T2DBMsg.exception(cause, E.E20114, property.getName());
 		property.getSurrogate().upgrade(surrogate);
 	}
 
@@ -91,7 +91,7 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 			check(Permission.MODIFY, property);
 			int id = getId(property);
 			if (id <= DatabaseBackend.MAX_MAGIC_NR)
-				throw T2DBJMsg.exception(J.J20120, property.getName());
+				throw T2DBMsg.exception(E.E20120, property.getName());
 			policy.willDelete(property);
 			delete_property = open(DELETE_PROPERTY, property, delete_property);
 			delete_property.setInt(1, id);
@@ -103,7 +103,7 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 			delete_property = close(delete_property);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, D.D20115, property.getName());
+			throw T2DBMsg.exception(cause, E.E20115, property.getName());
 	}
 	
 	private PreparedStatement update_property;
@@ -133,7 +133,7 @@ public class WriteMethodsForProperty extends ReadMethodsForProperty {
 			update_property = close(update_property);
 		}
 		if (!done || cause != null)
-			throw T2DBJMsg.exception(cause, J.J20116, property.getName());
+			throw T2DBMsg.exception(cause, E.E20116, property.getName());
 	}
 	
 }
