@@ -33,7 +33,6 @@ import ch.agent.crnickl.T2DBMsg;
 import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.Attribute;
 import ch.agent.crnickl.api.Chronicle;
-import ch.agent.crnickl.api.DBObject;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.Database;
 import ch.agent.crnickl.api.Property;
@@ -204,7 +203,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 	 */
 	public boolean getAttributeValue(List<Chronicle> chronicles, Attribute<?> attribute) throws T2DBException {
 		// note: things would be easier here with Spring's SimpleJdbcTemplate and a named parameter
-		
+		Database db = null;
 		if (sel_attibute_prop_in_ent == null)
 			sel_attibute_prop_in_ent = new PreparedStatement[MAX_ENTITY_DEPTH];
 		
@@ -217,19 +216,19 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			String sql = null;
 			PreparedStatement stmt = null;
 			int[] ids = new int[size];
-			DBObject dBObject = chronicles.get(0);
+			db = chronicles.get(0).getSurrogate().getDatabase();
 			if (size > MAX_ENTITY_DEPTH) {
 				// "dynamic" statement
 				stmt = sel_attibute_prop_in_ent[0];
 				if (stmt != null && stmt.getParameterMetaData().getParameterCount() != size + 1)
 					stmt = null;
 				sql = String.format(SEL_ATTRIBUTE_BY_PROP_IN_ENT, repeat("?", ",", size));
-				stmt = open(sql, dBObject, stmt);
+				stmt = open(sql, db, stmt);
 				sel_attibute_prop_in_ent[0] = stmt;
 			} else {
 				stmt = sel_attibute_prop_in_ent[size];
 				sql = String.format(SEL_ATTRIBUTE_BY_PROP_IN_ENT, repeat("?", ",", size));
-				stmt = open(sql, dBObject, stmt);
+				stmt = open(sql, db, stmt);
 				sel_attibute_prop_in_ent[size] = stmt;
 			}
 			stmt.setInt(1, getId(attribute.getProperty()));
@@ -258,6 +257,10 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 				sel_attibute_prop_in_ent[0] = close(sel_attibute_prop_in_ent[0]);
 			else if (size > 0)
 				sel_attibute_prop_in_ent[size] = close(sel_attibute_prop_in_ent[size]);
+		}
+		if (found > 0) {
+			Surrogate s = makeSurrogate(db, DBObjectType.CHRONICLE, found);
+			check(Permission.READ, s);
 		}
 		return found > 0;
 	}
