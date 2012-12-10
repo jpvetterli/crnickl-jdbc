@@ -6,3 +6,9 @@ target/
 *.jar
 *.war
 *.ear
+
+# Eclipse files
+.classpath
+.project
+.settings/
+
