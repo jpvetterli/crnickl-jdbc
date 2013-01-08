@@ -457,7 +457,7 @@ public class WriteMethodsForSchema extends ReadMethodsForSchema {
 	 * This looks like a "reading" method but is used in the context of schema updating.
 	 * 
 	 * @param ss a series definition
-	 * @param schemas a schema
+	 * @param schema a schema
 	 * @return a surrogate or null
 	 * @throws T2DBException
 	 */
