@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012 Hauser Olsson GmbH
+ *   Copyright 2012-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.crnickl.jdbc
- * Type: AccessMethodsForNumber
- * Version: 1.0.1
  */
 package ch.agent.crnickl.jdbc;
 
@@ -42,7 +39,6 @@ import ch.agent.t2.timeseries.TimeAddressable;
  * An implementation of {@link ValueAccessMethods} for numeric data using {@link java.lang.Double}.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.1
  */
 public class AccessMethodsForNumber extends JDBCDatabaseMethods implements ValueAccessMethods<Double> {
 	

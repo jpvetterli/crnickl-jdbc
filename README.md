@@ -1,7 +1,7 @@
 crnickl-jdbc : JDBC Implementation of the CrNiCKL Database 
 ==========================================================
 
-	Copyright 2012 Hauser Olsson GmbH.
+	Copyright 2012-2013 Hauser Olsson GmbH.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
