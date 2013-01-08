@@ -19,7 +19,7 @@ crnickl-jdbc : JDBC Implementation of the CrNiCKL Database
 
 This is a JDBC implementation of the CrNiCKL (chronicle) database. 
 CrNiCKL (pronounced "chronicle") is a database for time series written in 
-Java running on top of SQL and (soon) NoSQL systems.
+Java running on top of SQL and NoSQL systems.
 
 Distribution
 ------------
@@ -37,8 +37,9 @@ than 1.1.1, the suffix of the source JAR is `.source` instead of `-sources`.
 For Maven users
 ---------------
 
-Starting with version 1.1.2, the software is available from the central maven 
-repository. To use version x.y.z, insert the following dependency into your 
+Starting with version 1.1.2, the software is available from the <a 
+href="http://repo.maven.apache.org/maven2/ch/agent/crnickl-jdbc/">Maven central 
+repository</a>. To use version x.y.z, insert the following dependency into your 
 `pom.xml` file:
 
     <dependency>
@@ -98,7 +99,7 @@ Finding more information
 More information on CrNiCKL is available at 
 <http://agent.ch/timeseries/crnickl/>.
 
-<small>Updated: 2012-09-07/jpv</small>
+<small>Updated: 2013-01-08/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
