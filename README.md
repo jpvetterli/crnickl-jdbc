@@ -25,11 +25,12 @@ Distribution
 ------------
 
 Starting with version 1.1.2, the distribution consists of a binary JAR with 
-compiled classes, of a javadoc JAR and of a source JAR. For version x.y.z:
+compiled classes, of a javadoc JAR and of a source JAR. The current version is 
+1.1.3:
 
-	crnickl-jdbc-x.y.z.jar
-	crnickl-jdbc-x.y.z-javadoc.jar
-	crnickl-jdbc-x.y.z-sources.jar
+	crnickl-jdbc-1.1.3.jar
+	crnickl-jdbc-1.1.3-javadoc.jar
+	crnickl-jdbc-1.1.3-sources.jar
 
 For versions earlier than 1.1.2, there is no javadoc JAR. For versions earlier 
 than 1.1.1, the suffix of the source JAR is `.source` instead of `-sources`. 

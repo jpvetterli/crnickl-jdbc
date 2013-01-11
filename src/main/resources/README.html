@@ -1,6 +1,6 @@
 <h1>crnickl-jdbc : JDBC Implementation of the CrNiCKL Database </h1>
 
-<pre><code>Copyright 2012 Hauser Olsson GmbH.
+<pre><code>Copyright 2012-2013 Hauser Olsson GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,16 +19,17 @@ limitations under the License.
 
 <p>This is a JDBC implementation of the CrNiCKL (chronicle) database. 
 CrNiCKL (pronounced "chronicle") is a database for time series written in 
-Java running on top of SQL and (soon) NoSQL systems.</p>
+Java running on top of SQL and NoSQL systems.</p>
 
 <h2>Distribution</h2>
 
 <p>Starting with version 1.1.2, the distribution consists of a binary JAR with 
-compiled classes, of a javadoc JAR and of a source JAR. For version x.y.z:</p>
+compiled classes, of a javadoc JAR and of a source JAR. The current version is 
+1.1.3:</p>
 
-<pre><code>crnickl-jdbc-x.y.z.jar
-crnickl-jdbc-x.y.z-javadoc.jar
-crnickl-jdbc-x.y.z-sources.jar
+<pre><code>crnickl-jdbc-1.1.3.jar
+crnickl-jdbc-1.1.3-javadoc.jar
+crnickl-jdbc-1.1.3-sources.jar
 </code></pre>
 
 <p>For versions earlier than 1.1.2, there is no javadoc JAR. For versions earlier 
@@ -36,8 +37,9 @@ than 1.1.1, the suffix of the source JAR is <code>.source</code> instead of <cod
 
 <h2>For Maven users</h2>
 
-<p>Starting with version 1.1.2, the software is available from the central maven 
-repository. To use version x.y.z, insert the following dependency into your 
+<p>Starting with version 1.1.2, the software is available from the <a 
+href="http://repo.maven.apache.org/maven2/ch/agent/crnickl-jdbc/">Maven central 
+repository</a>. To use version x.y.z, insert the following dependency into your 
 <code>pom.xml</code> file:</p>
 
 <pre><code>&lt;dependency&gt;
@@ -101,6 +103,6 @@ additional dependencies must be addressed to compile unit tests:</p>
 <p>More information on CrNiCKL is available at 
 <a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>.</p>
 
-<p><small>Updated: 2012-09-07/jpv</small></p>
+<p><small>Updated: 2013-01-08/jpv</small></p>
 
 <p><link rel="stylesheet" type="text/css" href="README.css"/></p>
