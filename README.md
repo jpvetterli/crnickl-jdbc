@@ -100,7 +100,7 @@ Finding more information
 More information on CrNiCKL is available at 
 <http://agent.ch/timeseries/crnickl/>.
 
-<small>Updated: 2013-01-08/jpv</small>
+<small>Updated: 2013-01-16/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
