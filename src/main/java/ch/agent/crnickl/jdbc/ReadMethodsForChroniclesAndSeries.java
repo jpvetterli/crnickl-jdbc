@@ -304,7 +304,7 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 	 * @param ids
 	 * @param a
 	 * @param b
-	 * @return
+	 * @return true if a is before b in the list of ids else return false
 	 */
 	private boolean moreSpecific(int[] ids, int a, int b) {
 		for(int id : ids) {

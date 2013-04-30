@@ -316,7 +316,7 @@ public class ReadMethodsForSchema extends JDBCDatabaseMethods {
 	 * @param database
 	 * @param rawSchema
 	 * @param cycleDetector
-	 * @return
+	 * @return an updatable schema
 	 * @throws T2DBException
 	 */
 	private UpdatableSchema getSchema(Database database, RawSchema rawSchema, Set<Integer> cycleDetector) throws T2DBException {
