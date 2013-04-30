@@ -24,23 +24,23 @@ Java running on top of SQL and NoSQL systems.
 Distribution
 ------------
 
-Starting with version 1.1.2, the distribution consists of a binary JAR with 
-compiled classes, of a javadoc JAR and of a source JAR. The current version is 
-1.1.3:
+The distribution consists of three archives
 
-	crnickl-jdbc-1.1.3.jar
-	crnickl-jdbc-1.1.3-javadoc.jar
-	crnickl-jdbc-1.1.3-sources.jar
+	crnickl-jdbc-x.y.z.jar
+	crnickl-jdbc-x.y.z-javadoc.jar
+	crnickl-jdbc-x.y.z-sources.jar
 
-For versions earlier than 1.1.2, there is no javadoc JAR. For versions earlier 
-than 1.1.1, the suffix of the source JAR is `.source` instead of `-sources`. 
+with compiled classes, HTML documentation, and sources. The version number 
+`x.y.z` follows the maven convention. The distribution also includes .asc 
+files with detached cryptographic signatures.
+
 
 For Maven users
 ---------------
 
-Starting with version 1.1.2, the software is available from the <a 
+The software is available from the <a 
 href="http://repo.maven.apache.org/maven2/ch/agent/crnickl-jdbc/">Maven central 
-repository</a>. To use version x.y.z, insert the following dependency into your 
+repository</a>. To use version `x.y.z`, insert the following dependency into your 
 `pom.xml` file:
 
     <dependency>
@@ -67,11 +67,11 @@ repository. They can also be found in the `target` directory.
 When building the software by other means, the following dependencies must be
 addressed:
 
-- `crnickl-<version>.jar` [CrNiCKL database](http://agent.ch/timeseries/crnickl/)
-- `t2-<version>.jar` [Time2 Library](http://agent.ch/timeseries/t2/)  
+- `crnickl-x.y.z.jar` [CrNiCKL database](http://agent.ch/timeseries/crnickl/)
+- `t2-x.y.z.jar` [Time2 Library](http://agent.ch/timeseries/t2/)  
 
-Versions numbers can be found in the <q>POM</q> file included in the binary 
-JAR:
+Replace all `x.y.z` with the actual version numbers which can be found in the 
+<q>POM</q> file included in the binary JAR:
 
 	/META-INF/maven/ch.agent/crnickl-jdbc/pom.xml
 
@@ -99,8 +99,7 @@ Finding more information
 
 More information on CrNiCKL is available at 
 <http://agent.ch/timeseries/crnickl/>.
-
-<small>Updated: 2013-01-16/jpv</small>
+This README was updated on 2013-04-30 (jpv).
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 

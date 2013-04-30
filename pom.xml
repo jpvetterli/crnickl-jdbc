@@ -21,7 +21,7 @@
 
   <groupId>ch.agent</groupId>
   <artifactId>crnickl-jdbc</artifactId>
-  <version>1.1.3</version>
+  <version>1.1.4</version>
   <packaging>jar</packaging>
   <name>CrNiCKL JDBC implementation</name>
   <description>JDBC implementation of the CrNiCKL database manager for time series.</description>
@@ -86,11 +86,6 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.12.2</version>
-        <configuration>
-          <excludes>
-            <!-- exclude>**/junit/T099_FooBarTest.java</exclude -->
-           </excludes>
-        </configuration>
       </plugin>
 
       <plugin>
@@ -162,21 +157,21 @@
     <dependency>
       <groupId>ch.agent</groupId>
       <artifactId>crnickl</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.1</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>ch.agent</groupId>
       <artifactId>crnickl-test</artifactId>
-      <version>1.0.0</version>
+      <version>1.1.0</version>
       <scope>test</scope>
     </dependency>
 

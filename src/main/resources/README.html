@@ -23,23 +23,22 @@ Java running on top of SQL and NoSQL systems.</p>
 
 <h2>Distribution</h2>
 
-<p>Starting with version 1.1.2, the distribution consists of a binary JAR with 
-compiled classes, of a javadoc JAR and of a source JAR. The current version is 
-1.1.3:</p>
+<p>The distribution consists of three archives</p>
 
-<pre><code>crnickl-jdbc-1.1.3.jar
-crnickl-jdbc-1.1.3-javadoc.jar
-crnickl-jdbc-1.1.3-sources.jar
+<pre><code>crnickl-jdbc-x.y.z.jar
+crnickl-jdbc-x.y.z-javadoc.jar
+crnickl-jdbc-x.y.z-sources.jar
 </code></pre>
 
-<p>For versions earlier than 1.1.2, there is no javadoc JAR. For versions earlier 
-than 1.1.1, the suffix of the source JAR is <code>.source</code> instead of <code>-sources</code>. </p>
+<p>with compiled classes, HTML documentation, and sources. The version number 
+<code>x.y.z</code> follows the maven convention. The distribution also includes .asc 
+files with detached cryptographic signatures.</p>
 
 <h2>For Maven users</h2>
 
-<p>Starting with version 1.1.2, the software is available from the <a 
+<p>The software is available from the <a 
 href="http://repo.maven.apache.org/maven2/ch/agent/crnickl-jdbc/">Maven central 
-repository</a>. To use version x.y.z, insert the following dependency into your 
+repository</a>. To use version <code>x.y.z</code>, insert the following dependency into your 
 <code>pom.xml</code> file:</p>
 
 <pre><code>&lt;dependency&gt;
@@ -68,12 +67,12 @@ repository. They can also be found in the <code>target</code> directory.</p>
 addressed:</p>
 
 <ul>
-<li><code>crnickl-&lt;version&gt;.jar</code> <a href="http://agent.ch/timeseries/crnickl/">CrNiCKL database</a></li>
-<li><code>t2-&lt;version&gt;.jar</code> <a href="http://agent.ch/timeseries/t2/">Time2 Library</a>  </li>
+<li><code>crnickl-x.y.z.jar</code> <a href="http://agent.ch/timeseries/crnickl/">CrNiCKL database</a></li>
+<li><code>t2-x.y.z.jar</code> <a href="http://agent.ch/timeseries/t2/">Time2 Library</a>  </li>
 </ul>
 
-<p>Versions numbers can be found in the <q>POM</q> file included in the binary 
-JAR:</p>
+<p>Replace all <code>x.y.z</code> with the actual version numbers which can be found in the 
+<q>POM</q> file included in the binary JAR:</p>
 
 <pre><code>/META-INF/maven/ch.agent/crnickl-jdbc/pom.xml
 </code></pre>
@@ -101,8 +100,7 @@ additional dependencies must be addressed to compile unit tests:</p>
 <h2>Finding more information</h2>
 
 <p>More information on CrNiCKL is available at 
-<a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>.</p>
-
-<p><small>Updated: 2013-01-16/jpv</small></p>
+<a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>.
+This README was updated on 2013-04-30 (jpv).</p>
 
 <p><link rel="stylesheet" type="text/css" href="README.css"/></p>
