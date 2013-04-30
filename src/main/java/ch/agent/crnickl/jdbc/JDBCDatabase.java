@@ -27,6 +27,7 @@ import ch.agent.crnickl.T2DBMsg.E;
 import ch.agent.crnickl.api.Attribute;
 import ch.agent.crnickl.api.AttributeDefinition;
 import ch.agent.crnickl.api.Chronicle;
+import ch.agent.crnickl.api.DBObjectId;
 import ch.agent.crnickl.api.DBObjectType;
 import ch.agent.crnickl.api.DatabaseConfiguration;
 import ch.agent.crnickl.api.Property;
@@ -112,6 +113,11 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 		return getJDBCSession().getConnection();
 	}
 	
+	@Override
+	public DBObjectId makeDBObjectId(Object object) throws T2DBException {
+		return new JDBCObjectId(object);
+	}
+
 	@Override
 	public void commit() throws T2DBException {
 		getJDBCSession().commit();

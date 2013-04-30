@@ -15,6 +15,7 @@
  */
 package ch.agent.crnickl.jdbc;
 
+import ch.agent.crnickl.T2DBMsg.D;
 import ch.agent.crnickl.api.DBObjectId;
 
 /**
@@ -37,6 +38,29 @@ public class JDBCObjectId implements DBObjectId {
 		if (id < 1)
 			throw new IllegalArgumentException("id < 1");
 		this.id = id;
+	}
+	
+	private static int asInt(Object object) throws T2DBJException {
+		try {
+			return ((Integer) object).intValue();
+		} catch (Throwable discard) {
+			try {
+				return Integer.parseInt((String) object);
+			} catch (Throwable t) {
+				throw T2DBJMsg.exception(t, D.D02105, 
+						object == null ? "null" : object.toString());
+			}
+		}
+	}
+	
+	/**
+	 * Construct an object id from an object.
+	 * 
+	 * @param object
+	 * @throws T2DBJException
+	 */
+	public JDBCObjectId(Object object) throws T2DBJException {
+		this(asInt(object));
 	}
 	
 	/**
