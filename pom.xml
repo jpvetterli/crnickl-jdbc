@@ -21,7 +21,7 @@
 
   <groupId>ch.agent</groupId>
   <artifactId>crnickl-jdbc</artifactId>
-  <version>1.1.4</version>
+  <version>1.1.5</version>
   <packaging>jar</packaging>
   <name>CrNiCKL JDBC implementation</name>
   <description>JDBC implementation of the CrNiCKL database manager for time series.</description>
@@ -108,6 +108,7 @@
           <stylesheetfile>javadoc.css</stylesheetfile>
           <show>protected</show>
           <nohelp>true</nohelp>
+          <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
         <executions>
           <execution>
@@ -157,7 +158,7 @@
     <dependency>
       <groupId>ch.agent</groupId>
       <artifactId>crnickl</artifactId>
-      <version>1.2.1</version>
+      <version>1.2.2</version>
       <scope>compile</scope>
     </dependency>
 
