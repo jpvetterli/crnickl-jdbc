@@ -83,6 +83,16 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	}
 	
 	@Override
+	public void open() throws T2DBException {
+		JDBCSession.getInstance().getConnection();
+	}
+	
+	@Override
+	public void close() throws T2DBException {
+		JDBCSession.getInstance().close(true);
+	}
+
+	@Override
 	public void configure(DatabaseConfiguration configuration) throws T2DBException {
 		new JDBCSession(configuration);
 		super.configure(configuration);

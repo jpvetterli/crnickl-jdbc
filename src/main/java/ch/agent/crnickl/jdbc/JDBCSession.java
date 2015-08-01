@@ -102,8 +102,7 @@ public class JDBCSession {
 			user = configuration.getParameter(JDBC_USER, true);
 			prop.setProperty("user", user);
 			prop.setProperty("password", configuration.getParameter(JDBC_PASSWORD, true));
-			configuration.setParameter(JDBC_USER, "000000");
-			configuration.setParameter(JDBC_PASSWORD, "000000");
+			// don't zap credentials so we can restart
 			// next one is a workaround for a mysql problem
 			prop.setProperty("useServerPrepStmts", "false");
 			connection = DriverManager.getConnection(url, prop);
