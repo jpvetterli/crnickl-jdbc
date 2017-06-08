@@ -125,6 +125,9 @@ public class JDBCSession {
 			if (isOpen())
 				connection.close();
 			connection = null;
+			configuration = null;
+			user = null;
+			url = null;
 		} catch (Exception e) {
 			if (!ignoreException)
 				throw T2DBMsg.exception(E.E00110, toString());

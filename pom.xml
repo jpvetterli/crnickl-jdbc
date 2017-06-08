@@ -21,7 +21,7 @@
 
   <groupId>ch.agent</groupId>
   <artifactId>crnickl-jdbc</artifactId>
-  <version>1.1.5</version>
+  <version>1.1.6</version>
   <packaging>jar</packaging>
   <name>CrNiCKL JDBC implementation</name>
   <description>JDBC implementation of the CrNiCKL database manager for time series.</description>
