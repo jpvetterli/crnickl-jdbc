@@ -1,6 +1,6 @@
 <!--
 
-   Copyright 2012-2013 Hauser Olsson GmbH
+   Copyright 2012-2017 Hauser Olsson GmbH
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ch.agent</groupId>
-  <artifactId>crnickl-jdbc</artifactId>
-  <version>1.1.6</version>
+  <artifactId>crnickl-jdbc</artifactId> <version>2.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>CrNiCKL JDBC implementation</name>
   <description>JDBC implementation of the CrNiCKL database manager for time series.</description>
@@ -76,7 +75,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.5.1</version>
+        <version>3.7.0</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -85,12 +84,12 @@
 
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.12.2</version>
+        <version>2.20.1</version>
       </plugin>
 
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.2</version>
+        <version>3.0.1</version>
          <executions>
            <execution>
             <id>attach-sources</id>
@@ -103,7 +102,7 @@
 
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8.1</version>
+        <version>2.9.1</version>
         <configuration>
           <stylesheetfile>javadoc.css</stylesheetfile>
           <show>protected</show>
@@ -137,7 +136,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -157,36 +156,31 @@
 
     <dependency>
       <groupId>ch.agent</groupId>
-      <artifactId>crnickl</artifactId>
-      <version>1.2.2</version>
+      <artifactId>crnickl</artifactId> <version>2.0.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <artifactId>junit</artifactId> <version>4.11</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>ch.agent</groupId>
-      <artifactId>crnickl-test</artifactId>
-      <version>1.1.0</version>
+      <artifactId>crnickl-test</artifactId> <version>2.0.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <version>2.2.8</version>
+      <artifactId>hsqldb</artifactId> <version>2.2.8</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.hsqldb</groupId>
-      <artifactId>sqltool</artifactId>
-      <version>2.2.8</version>
+      <artifactId>sqltool</artifactId> <version>2.2.8</version>
       <scope>test</scope>
     </dependency>
 
