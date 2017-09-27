@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012-2013 Hauser Olsson GmbH
+ *   Copyright 2012-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,8 +235,11 @@ public class ReadMethodsForChroniclesAndSeries extends JDBCDatabaseMethods {
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()) {
 				int name = rs.getInt(1);
-				if (name == 0)
+				if (name == 0) {
+					stmt.close(); 
+					stmt = null; 
 					throw T2DBMsg.exception(E.E40106, sql);
+				}
 				if (found == 0 || moreSpecific(ids, name, found)) {
 					found = name;
 					attribute.scan(rs.getString(2));

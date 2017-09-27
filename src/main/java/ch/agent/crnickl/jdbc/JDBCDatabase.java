@@ -1,5 +1,5 @@
 /*
- *   Copyright 2012-2013 Hauser Olsson GmbH
+ *   Copyright 2012-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import ch.agent.crnickl.impl.SchemaUpdatePolicy;
 import ch.agent.crnickl.impl.UpdateEventImpl;
 import ch.agent.crnickl.impl.UpdateEventPublisherImpl;
 import ch.agent.crnickl.jdbc.T2DBJMsg.J;
+import ch.agent.t2.time.TimeDomainCatalog;
 
 /**
  * A JDBC implementation of {@link DatabaseBackendImpl}. 
@@ -77,9 +78,10 @@ public class JDBCDatabase extends DatabaseBackendImpl {
 	 * Construct a {@link DatabaseBackend}.
 	 * 
 	 * @param name the name of the database
+	 * @param timeDomainCatalog the catalog for scanning time domains
 	 */
-	public JDBCDatabase(String name) {
-		super(name);
+	public JDBCDatabase(String name, TimeDomainCatalog timeDomainCatalog) {
+		super(name, timeDomainCatalog);
 	}
 	
 	@Override
