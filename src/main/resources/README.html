@@ -1,6 +1,6 @@
 <h1>crnickl-jdbc : JDBC Implementation of the CrNiCKL Database </h1>
 
-<pre><code>Copyright 2012-2013 Hauser Olsson GmbH.
+<pre><code>Copyright 2012-2017 Hauser Olsson GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,11 @@ limitations under the License.
 CrNiCKL (pronounced "chronicle") is a database for time series written in 
 Java running on top of SQL and NoSQL systems.</p>
 
+<h2>Version 2</h2>
+
+<p>Version 2 brings a non-compatible change in <code>JDBCDatabase</code>. The constructor 
+now takes a second parameter: a <code>ch.agent.t2.time.TimeDomainCatalog</code>. </p>
+
 <h2>Distribution</h2>
 
 <p>The distribution consists of three archives</p>
@@ -36,10 +41,9 @@ files with detached cryptographic signatures.</p>
 
 <h2>For Maven users</h2>
 
-<p>The software is available from the <a 
-href="http://repo.maven.apache.org/maven2/ch/agent/crnickl-jdbc/">Maven central 
-repository</a>. To use version <code>x.y.z</code>, insert the following dependency into your 
-<code>pom.xml</code> file:</p>
+<p>The software is available from the [Maven central repository&lt;]
+(http://repo.maven.apache.org/maven2/ch/agent/crnickl-jdbc/). 
+To use version <code>x.y.z</code>, insert the following dependency into your <code>pom.xml</code> file:</p>
 
 <pre><code>&lt;dependency&gt;
   &lt;groupId&gt;ch.agent&lt;/groupId&gt;
@@ -94,13 +98,13 @@ additional dependencies must be addressed to compile unit tests:</p>
 
 <h2>Browsing the source code</h2>
 
-<p>The source is available on GitHub at 
-<a href="http://github.com/jpvetterli/crnickl-jdbc.git">http://github.com/jpvetterli/crnickl-jdbc.git</a>.</p>
+<p>The source is available on <a href="http://github.com/jpvetterli/crnickl-jdbc.git">GitHub</a>.</p>
 
 <h2>Finding more information</h2>
 
-<p>More information on CrNiCKL is available at 
-<a href="http://agent.ch/timeseries/crnickl/">http://agent.ch/timeseries/crnickl/</a>.
-This README was updated on 2013-04-30 (jpv).</p>
+<p>More information on CrNiCKL is available at the [project web site]
+(http://agent.ch/timeseries/crnickl/).</p>
+
+<p><small>Updated: 2017-10-05/jpv.</p>
 
 <p><link rel="stylesheet" type="text/css" href="README.css"/></p>

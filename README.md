@@ -1,7 +1,7 @@
 crnickl-jdbc : JDBC Implementation of the CrNiCKL Database 
 ==========================================================
 
-	Copyright 2012-2013 Hauser Olsson GmbH.
+	Copyright 2012-2017 Hauser Olsson GmbH.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -21,6 +21,12 @@ This is a JDBC implementation of the CrNiCKL (chronicle) database.
 CrNiCKL (pronounced "chronicle") is a database for time series written in 
 Java running on top of SQL and NoSQL systems.
 
+Version 2
+---------
+
+Version 2 brings a non-compatible change in `JDBCDatabase`. The constructor 
+now takes a second parameter: a `ch.agent.t2.time.TimeDomainCatalog`. 
+
 Distribution
 ------------
 
@@ -38,10 +44,9 @@ files with detached cryptographic signatures.
 For Maven users
 ---------------
 
-The software is available from the <a 
-href="http://repo.maven.apache.org/maven2/ch/agent/crnickl-jdbc/">Maven central 
-repository</a>. To use version `x.y.z`, insert the following dependency into your 
-`pom.xml` file:
+The software is available from the [Maven central repository<]
+(http://repo.maven.apache.org/maven2/ch/agent/crnickl-jdbc/). 
+To use version `x.y.z`, insert the following dependency into your `pom.xml` file:
 
     <dependency>
       <groupId>ch.agent</groupId>
@@ -91,15 +96,15 @@ additional dependencies must be addressed to compile unit tests:
 Browsing the source code
 ------------------------
 
-The source is available on GitHub at 
-<http://github.com/jpvetterli/crnickl-jdbc.git>.
+The source is available on [GitHub](http://github.com/jpvetterli/crnickl-jdbc.git).
 
 Finding more information
 ------------------------
 
-More information on CrNiCKL is available at 
-<http://agent.ch/timeseries/crnickl/>.
-This README was updated on 2013-04-30 (jpv).
+More information on CrNiCKL is available at the [project web site]
+(http://agent.ch/timeseries/crnickl/).
+
+<small>Updated: 2017-10-05/jpv.
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
