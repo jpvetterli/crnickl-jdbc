@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>ch.agent</groupId>
-  <artifactId>crnickl-jdbc</artifactId> <version>2.0.0-SNAPSHOT</version>
+  <artifactId>crnickl-jdbc</artifactId> <version>2.0.0</version>
   <packaging>jar</packaging>
   <name>CrNiCKL JDBC implementation</name>
   <description>JDBC implementation of the CrNiCKL database manager for time series.</description>
@@ -74,8 +74,7 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <artifactId>maven-compiler-plugin</artifactId> <version>3.7.0</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -83,13 +82,11 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.20.1</version>
+        <artifactId>maven-surefire-plugin</artifactId> <version>2.20.1</version>
       </plugin>
 
       <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
+        <artifactId>maven-source-plugin</artifactId> <version>3.0.1</version>
          <executions>
            <execution>
             <id>attach-sources</id>
@@ -101,8 +98,7 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
+        <artifactId>maven-javadoc-plugin</artifactId> <version>2.9.1</version>
         <configuration>
           <stylesheetfile>javadoc.css</stylesheetfile>
           <show>protected</show>
@@ -135,8 +131,7 @@
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <artifactId>maven-gpg-plugin</artifactId> <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -156,7 +151,7 @@
 
     <dependency>
       <groupId>ch.agent</groupId>
-      <artifactId>crnickl</artifactId> <version>2.0.0-SNAPSHOT</version>
+      <artifactId>crnickl</artifactId> <version>2.0.0</version>
       <scope>compile</scope>
     </dependency>
 
