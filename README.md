@@ -21,11 +21,11 @@ This is a JDBC implementation of the CrNiCKL (chronicle) database.
 CrNiCKL (pronounced "chronicle") is a database for time series written in 
 Java running on top of SQL and NoSQL systems.
 
-Version 2
----------
+Version 2.0.1
+-------------
 
-Version 2 brings a non-compatible change in `JDBCDatabase`. The constructor 
-now takes a second parameter: a `ch.agent.t2.time.TimeDomainCatalog`. 
+Versions 2.0.0 and 2.0.1 bring a non-compatible change in `JDBCDatabase`. The 
+constructor now takes a second parameter: a `ch.agent.t2.time.TimeDomainCatalog`. 
 
 Distribution
 ------------
@@ -101,10 +101,10 @@ The source is available on [GitHub](http://github.com/jpvetterli/crnickl-jdbc.gi
 Finding more information
 ------------------------
 
-More information on CrNiCKL is available at the [project web site]
-(http://agent.ch/timeseries/crnickl/).
+More information on CrNiCKL is available at the 
+[project web site](http://agent.ch/timeseries/crnickl/).
 
-<small>Updated: 2017-10-05/jpv.
+<small>Updated: 2017-10-06/jpv.</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
